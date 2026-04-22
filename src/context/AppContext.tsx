@@ -39,6 +39,7 @@ interface AppContextValue {
   register: typeof authStore.register;
   logout: typeof authStore.logout;
   createBooking: (input: CreateBookingInput) => Booking | null;
+  updateBookingStatus: (bookingId: string, status: BookingStatus) => void;
   updateWorkerProfile: (input: UpdateWorkerProfileInput) => void;
   getWorkerById: (workerId: string) => WorkerProfile | undefined;
   getBookingsByStatus: (status: BookingStatus) => Booking[];
@@ -55,7 +56,7 @@ const seededBookings: Booking[] = [
     date: "2026-04-25T14:00",
     location: "Visayan Village, Tagum City",
     note: "Need a relaxing home session after office hours.",
-    status: "confirmed",
+    status: "accepted",
   },
   {
     id: "b2",
@@ -160,6 +161,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
     return booking;
   };
 
+  const updateBookingStatus = (bookingId: string, status: BookingStatus) => {
+    setBookings((current) =>
+      current.map((booking) => (booking.id === bookingId ? { ...booking, status } : booking)),
+    );
+  };
+
   const updateWorkerProfile = ({ about, location, service, skills }: UpdateWorkerProfileInput) => {
     if (!user?.workerId) return;
 
@@ -191,6 +198,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       register: authStore.register,
       logout: authStore.logout,
       createBooking,
+      updateBookingStatus,
       updateWorkerProfile,
       getWorkerById: (workerId: string) => workers.find((worker) => worker.id === workerId),
       getBookingsByStatus: (status: BookingStatus) => bookings.filter((booking) => booking.status === status),

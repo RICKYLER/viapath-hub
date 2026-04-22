@@ -298,6 +298,10 @@
     @apply bg-primary/14 text-foreground;
   }
 
+  .status-pill.cancelled {
+    @apply bg-destructive/14 text-foreground;
+  }
+
 }
 
 @layer utilities {

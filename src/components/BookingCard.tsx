@@ -1,7 +1,9 @@
 import { format } from "date-fns";
-import { CalendarDays, MapPin, NotebookPen } from "lucide-react";
+import { CalendarDays, CheckCheck, MapPin, NotebookPen } from "lucide-react";
 
+import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { useAppContext } from "@/context/AppContext";
 import type { Booking } from "@/context/types";
 
 interface BookingCardProps {
@@ -10,6 +12,7 @@ interface BookingCardProps {
 }
 
 export function BookingCard({ booking, perspective }: BookingCardProps) {
+  const { updateBookingStatus } = useAppContext();
   const counterpart = perspective === "client" ? booking.workerName : booking.clientName;
 
   return (
@@ -41,6 +44,23 @@ export function BookingCard({ booking, perspective }: BookingCardProps) {
           <NotebookPen size={16} className="mt-0.5 shrink-0" />
           <p>{booking.note}</p>
         </div>
+
+        {perspective === "worker" ? (
+          <div className="flex flex-wrap gap-3">
+            {booking.status === "pending" ? (
+              <Button size="sm" onClick={() => updateBookingStatus(booking.id, "accepted")}>
+                <CheckCheck size={16} />
+                Accept booking
+              </Button>
+            ) : null}
+
+            {booking.status === "accepted" ? (
+              <Button size="sm" variant="outline" onClick={() => updateBookingStatus(booking.id, "completed")}>
+                Mark completed
+              </Button>
+            ) : null}
+          </div>
+        ) : null}
       </CardContent>
     </Card>
   );

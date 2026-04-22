@@ -23,7 +23,7 @@ export interface WorkerProfile {
   responseTime: string;
 }
 
-export type BookingStatus = "pending" | "confirmed" | "completed" | "cancelled";
+export type BookingStatus = "pending" | "accepted" | "completed";
 
 export interface Booking {
   id: string;

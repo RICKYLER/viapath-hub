@@ -290,7 +290,7 @@
     @apply bg-warning/18 text-foreground;
   }
 
-  .status-pill.confirmed {
+  .status-pill.accepted {
     @apply bg-success/18 text-foreground;
   }
 
@@ -298,9 +298,6 @@
     @apply bg-primary/14 text-foreground;
   }
 
-  .status-pill.cancelled {
-    @apply bg-destructive/14 text-foreground;
-  }
 }
 
 @layer utilities {

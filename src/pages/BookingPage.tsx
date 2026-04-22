@@ -1,11 +1,31 @@
 import { useMemo, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
+import { z } from "zod";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useAppContext } from "@/context/AppContext";
+import { toast } from "sonner";
+
+const getMinBookingDate = () => {
+  const now = new Date();
+  now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+  return now.toISOString().slice(0, 16);
+};
+
+const bookingSchema = z.object({
+  date: z
+    .string()
+    .trim()
+    .refine((value) => {
+      const parsed = new Date(value);
+      return !Number.isNaN(parsed.getTime()) && parsed.getTime() > Date.now();
+    }, "Please choose a future booking date and time."),
+  location: z.string().trim().min(5, "Enter a valid service address.").max(160, "Address is too long."),
+  note: z.string().trim().min(5, "Add a short booking note.").max(300, "Booking note is too long."),
+});
 
 export function BookingPage({ workerId }: { workerId: string }) {
   const navigate = useNavigate();
@@ -14,6 +34,7 @@ export function BookingPage({ workerId }: { workerId: string }) {
   const [date, setDate] = useState("2026-04-30T10:00");
   const [location, setLocation] = useState(user?.location ?? "Tagum City, Davao del Norte");
   const [note, setNote] = useState("Please bring needed tools and confirm before arrival.");
+  const [error, setError] = useState<string | null>(null);
 
   const summary = useMemo(() => {
     if (!worker) return "";
@@ -29,9 +50,22 @@ export function BookingPage({ workerId }: { workerId: string }) {
   }
 
   const submit = () => {
-    const booking = createBooking({ workerId: worker.id, date, location, note });
+    const parsed = bookingSchema.safeParse({ date, location, note });
+    if (!parsed.success) {
+      const message = parsed.error.issues[0]?.message ?? "Please review your booking details.";
+      setError(message);
+      toast.error(message);
+      return;
+    }
+
+    setError(null);
+    const booking = createBooking({ workerId: worker.id, ...parsed.data });
     if (booking) {
       navigate({ to: "/client/bookings" });
+    } else {
+      const message = "This booking date is no longer valid. Please choose a future date.";
+      setError(message);
+      toast.error(message);
     }
   };
 
@@ -57,7 +91,7 @@ export function BookingPage({ workerId }: { workerId: string }) {
       <section className="form-panel space-y-5">
         <div className="space-y-2">
           <Label htmlFor="date">Appointment date</Label>
-          <Input id="date" type="datetime-local" value={date} onChange={(event) => setDate(event.target.value)} />
+          <Input id="date" type="datetime-local" min={getMinBookingDate()} value={date} onChange={(event) => setDate(event.target.value)} />
         </div>
         <div className="space-y-2">
           <Label htmlFor="location">Service address</Label>
@@ -71,6 +105,7 @@ export function BookingPage({ workerId }: { workerId: string }) {
           <p className="text-sm text-muted-foreground">Summary</p>
           <p className="mt-2 font-semibold text-foreground">{summary}</p>
         </div>
+        {error ? <p className="text-sm text-destructive">{error}</p> : null}
         <Button className="w-full" size="lg" onClick={submit}>
           Confirm booking
         </Button>

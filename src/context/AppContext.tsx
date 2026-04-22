@@ -39,11 +39,18 @@ interface AppContextValue {
   register: typeof authStore.register;
   logout: typeof authStore.logout;
   createBooking: (input: CreateBookingInput) => Booking | null;
-  updateBookingStatus: (bookingId: string, status: BookingStatus) => void;
+  updateBookingStatus: (bookingId: string, status: BookingStatus) => boolean;
   updateWorkerProfile: (input: UpdateWorkerProfileInput) => void;
   getWorkerById: (workerId: string) => WorkerProfile | undefined;
   getBookingsByStatus: (status: BookingStatus) => Booking[];
 }
+
+const createStatusHistoryItem = (status: BookingStatus, changedAt: string) => ({ status, changedAt });
+
+const isFutureBookingDate = (date: string) => {
+  const parsedDate = new Date(date);
+  return !Number.isNaN(parsedDate.getTime()) && parsedDate.getTime() > Date.now();
+};
 
 const seededBookings: Booking[] = [
   {
@@ -57,6 +64,10 @@ const seededBookings: Booking[] = [
     location: "Visayan Village, Tagum City",
     note: "Need a relaxing home session after office hours.",
     status: "accepted",
+    statusHistory: [
+      createStatusHistoryItem("pending", "2026-04-22T09:15:00.000Z"),
+      createStatusHistoryItem("accepted", "2026-04-22T10:00:00.000Z"),
+    ],
   },
   {
     id: "b2",
@@ -69,6 +80,7 @@ const seededBookings: Booking[] = [
     location: "Mankilam, Tagum City",
     note: "Kitchen sink leak needs checking before noon.",
     status: "pending",
+    statusHistory: [createStatusHistoryItem("pending", "2026-04-22T11:30:00.000Z")],
   },
   {
     id: "b3",
@@ -81,6 +93,7 @@ const seededBookings: Booking[] = [
     location: "Magugpo South, Tagum City",
     note: "Deep tissue massage after a basketball game.",
     status: "pending",
+    statusHistory: [createStatusHistoryItem("pending", "2026-04-22T12:10:00.000Z")],
   },
 ];
 
@@ -142,7 +155,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
     if (!user) return null;
 
     const worker = workers.find((candidate) => candidate.id === workerId);
-    if (!worker) return null;
+    if (!worker || !isFutureBookingDate(date)) return null;
+
+    const createdAt = new Date().toISOString();
 
     const booking: Booking = {
       id: `booking-${Date.now()}`,
@@ -155,6 +170,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       location,
       note,
       status: "pending",
+      statusHistory: [createStatusHistoryItem("pending", createdAt)],
     };
 
     setBookings((current) => [booking, ...current]);
@@ -162,9 +178,30 @@ export function AppProvider({ children }: { children: ReactNode }) {
   };
 
   const updateBookingStatus = (bookingId: string, status: BookingStatus) => {
+    let didUpdate = false;
+
     setBookings((current) =>
-      current.map((booking) => (booking.id === bookingId ? { ...booking, status } : booking)),
+      current.map((booking) => {
+        if (booking.id !== bookingId) return booking;
+        if (booking.status === status) {
+          didUpdate = true;
+          return booking;
+        }
+        if (booking.status === "completed" || booking.status === "cancelled") return booking;
+        if (status === "accepted" && (booking.status !== "pending" || !isFutureBookingDate(booking.date))) return booking;
+        if (status === "completed" && booking.status !== "accepted") return booking;
+        if (status === "cancelled" && !["pending", "accepted"].includes(booking.status)) return booking;
+
+        didUpdate = true;
+        return {
+          ...booking,
+          status,
+          statusHistory: [...booking.statusHistory, createStatusHistoryItem(status, new Date().toISOString())],
+        };
+      }),
     );
+
+    return didUpdate;
   };
 
   const updateWorkerProfile = ({ about, location, service, skills }: UpdateWorkerProfileInput) => {

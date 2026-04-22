@@ -9,38 +9,218 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as WorkerRouteImport } from './routes/worker'
+import { Route as RegisterRouteImport } from './routes/register'
+import { Route as LoginRouteImport } from './routes/login'
+import { Route as ClientRouteImport } from './routes/client'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as WorkerProfileRouteImport } from './routes/worker.profile'
+import { Route as WorkerJobsRouteImport } from './routes/worker.jobs'
+import { Route as WorkerDashboardRouteImport } from './routes/worker.dashboard'
+import { Route as ClientSearchRouteImport } from './routes/client.search'
+import { Route as ClientDashboardRouteImport } from './routes/client.dashboard'
+import { Route as ClientBookingsRouteImport } from './routes/client.bookings'
+import { Route as ClientWorkersWorkerIdRouteImport } from './routes/client.workers.$workerId'
+import { Route as ClientBookingWorkerIdRouteImport } from './routes/client.booking.$workerId'
 
+const WorkerRoute = WorkerRouteImport.update({
+  id: '/worker',
+  path: '/worker',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const RegisterRoute = RegisterRouteImport.update({
+  id: '/register',
+  path: '/register',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ClientRoute = ClientRouteImport.update({
+  id: '/client',
+  path: '/client',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const WorkerProfileRoute = WorkerProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => WorkerRoute,
+} as any)
+const WorkerJobsRoute = WorkerJobsRouteImport.update({
+  id: '/jobs',
+  path: '/jobs',
+  getParentRoute: () => WorkerRoute,
+} as any)
+const WorkerDashboardRoute = WorkerDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => WorkerRoute,
+} as any)
+const ClientSearchRoute = ClientSearchRouteImport.update({
+  id: '/search',
+  path: '/search',
+  getParentRoute: () => ClientRoute,
+} as any)
+const ClientDashboardRoute = ClientDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => ClientRoute,
+} as any)
+const ClientBookingsRoute = ClientBookingsRouteImport.update({
+  id: '/bookings',
+  path: '/bookings',
+  getParentRoute: () => ClientRoute,
+} as any)
+const ClientWorkersWorkerIdRoute = ClientWorkersWorkerIdRouteImport.update({
+  id: '/workers/$workerId',
+  path: '/workers/$workerId',
+  getParentRoute: () => ClientRoute,
+} as any)
+const ClientBookingWorkerIdRoute = ClientBookingWorkerIdRouteImport.update({
+  id: '/booking/$workerId',
+  path: '/booking/$workerId',
+  getParentRoute: () => ClientRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/client': typeof ClientRouteWithChildren
+  '/login': typeof LoginRoute
+  '/register': typeof RegisterRoute
+  '/worker': typeof WorkerRouteWithChildren
+  '/client/bookings': typeof ClientBookingsRoute
+  '/client/dashboard': typeof ClientDashboardRoute
+  '/client/search': typeof ClientSearchRoute
+  '/worker/dashboard': typeof WorkerDashboardRoute
+  '/worker/jobs': typeof WorkerJobsRoute
+  '/worker/profile': typeof WorkerProfileRoute
+  '/client/booking/$workerId': typeof ClientBookingWorkerIdRoute
+  '/client/workers/$workerId': typeof ClientWorkersWorkerIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/client': typeof ClientRouteWithChildren
+  '/login': typeof LoginRoute
+  '/register': typeof RegisterRoute
+  '/worker': typeof WorkerRouteWithChildren
+  '/client/bookings': typeof ClientBookingsRoute
+  '/client/dashboard': typeof ClientDashboardRoute
+  '/client/search': typeof ClientSearchRoute
+  '/worker/dashboard': typeof WorkerDashboardRoute
+  '/worker/jobs': typeof WorkerJobsRoute
+  '/worker/profile': typeof WorkerProfileRoute
+  '/client/booking/$workerId': typeof ClientBookingWorkerIdRoute
+  '/client/workers/$workerId': typeof ClientWorkersWorkerIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/client': typeof ClientRouteWithChildren
+  '/login': typeof LoginRoute
+  '/register': typeof RegisterRoute
+  '/worker': typeof WorkerRouteWithChildren
+  '/client/bookings': typeof ClientBookingsRoute
+  '/client/dashboard': typeof ClientDashboardRoute
+  '/client/search': typeof ClientSearchRoute
+  '/worker/dashboard': typeof WorkerDashboardRoute
+  '/worker/jobs': typeof WorkerJobsRoute
+  '/worker/profile': typeof WorkerProfileRoute
+  '/client/booking/$workerId': typeof ClientBookingWorkerIdRoute
+  '/client/workers/$workerId': typeof ClientWorkersWorkerIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/client'
+    | '/login'
+    | '/register'
+    | '/worker'
+    | '/client/bookings'
+    | '/client/dashboard'
+    | '/client/search'
+    | '/worker/dashboard'
+    | '/worker/jobs'
+    | '/worker/profile'
+    | '/client/booking/$workerId'
+    | '/client/workers/$workerId'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/client'
+    | '/login'
+    | '/register'
+    | '/worker'
+    | '/client/bookings'
+    | '/client/dashboard'
+    | '/client/search'
+    | '/worker/dashboard'
+    | '/worker/jobs'
+    | '/worker/profile'
+    | '/client/booking/$workerId'
+    | '/client/workers/$workerId'
+  id:
+    | '__root__'
+    | '/'
+    | '/client'
+    | '/login'
+    | '/register'
+    | '/worker'
+    | '/client/bookings'
+    | '/client/dashboard'
+    | '/client/search'
+    | '/worker/dashboard'
+    | '/worker/jobs'
+    | '/worker/profile'
+    | '/client/booking/$workerId'
+    | '/client/workers/$workerId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ClientRoute: typeof ClientRouteWithChildren
+  LoginRoute: typeof LoginRoute
+  RegisterRoute: typeof RegisterRoute
+  WorkerRoute: typeof WorkerRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/worker': {
+      id: '/worker'
+      path: '/worker'
+      fullPath: '/worker'
+      preLoaderRoute: typeof WorkerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/register': {
+      id: '/register'
+      path: '/register'
+      fullPath: '/register'
+      preLoaderRoute: typeof RegisterRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/client': {
+      id: '/client'
+      path: '/client'
+      fullPath: '/client'
+      preLoaderRoute: typeof ClientRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,11 +228,105 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/worker/profile': {
+      id: '/worker/profile'
+      path: '/profile'
+      fullPath: '/worker/profile'
+      preLoaderRoute: typeof WorkerProfileRouteImport
+      parentRoute: typeof WorkerRoute
+    }
+    '/worker/jobs': {
+      id: '/worker/jobs'
+      path: '/jobs'
+      fullPath: '/worker/jobs'
+      preLoaderRoute: typeof WorkerJobsRouteImport
+      parentRoute: typeof WorkerRoute
+    }
+    '/worker/dashboard': {
+      id: '/worker/dashboard'
+      path: '/dashboard'
+      fullPath: '/worker/dashboard'
+      preLoaderRoute: typeof WorkerDashboardRouteImport
+      parentRoute: typeof WorkerRoute
+    }
+    '/client/search': {
+      id: '/client/search'
+      path: '/search'
+      fullPath: '/client/search'
+      preLoaderRoute: typeof ClientSearchRouteImport
+      parentRoute: typeof ClientRoute
+    }
+    '/client/dashboard': {
+      id: '/client/dashboard'
+      path: '/dashboard'
+      fullPath: '/client/dashboard'
+      preLoaderRoute: typeof ClientDashboardRouteImport
+      parentRoute: typeof ClientRoute
+    }
+    '/client/bookings': {
+      id: '/client/bookings'
+      path: '/bookings'
+      fullPath: '/client/bookings'
+      preLoaderRoute: typeof ClientBookingsRouteImport
+      parentRoute: typeof ClientRoute
+    }
+    '/client/workers/$workerId': {
+      id: '/client/workers/$workerId'
+      path: '/workers/$workerId'
+      fullPath: '/client/workers/$workerId'
+      preLoaderRoute: typeof ClientWorkersWorkerIdRouteImport
+      parentRoute: typeof ClientRoute
+    }
+    '/client/booking/$workerId': {
+      id: '/client/booking/$workerId'
+      path: '/booking/$workerId'
+      fullPath: '/client/booking/$workerId'
+      preLoaderRoute: typeof ClientBookingWorkerIdRouteImport
+      parentRoute: typeof ClientRoute
+    }
   }
 }
 
+interface ClientRouteChildren {
+  ClientBookingsRoute: typeof ClientBookingsRoute
+  ClientDashboardRoute: typeof ClientDashboardRoute
+  ClientSearchRoute: typeof ClientSearchRoute
+  ClientBookingWorkerIdRoute: typeof ClientBookingWorkerIdRoute
+  ClientWorkersWorkerIdRoute: typeof ClientWorkersWorkerIdRoute
+}
+
+const ClientRouteChildren: ClientRouteChildren = {
+  ClientBookingsRoute: ClientBookingsRoute,
+  ClientDashboardRoute: ClientDashboardRoute,
+  ClientSearchRoute: ClientSearchRoute,
+  ClientBookingWorkerIdRoute: ClientBookingWorkerIdRoute,
+  ClientWorkersWorkerIdRoute: ClientWorkersWorkerIdRoute,
+}
+
+const ClientRouteWithChildren =
+  ClientRoute._addFileChildren(ClientRouteChildren)
+
+interface WorkerRouteChildren {
+  WorkerDashboardRoute: typeof WorkerDashboardRoute
+  WorkerJobsRoute: typeof WorkerJobsRoute
+  WorkerProfileRoute: typeof WorkerProfileRoute
+}
+
+const WorkerRouteChildren: WorkerRouteChildren = {
+  WorkerDashboardRoute: WorkerDashboardRoute,
+  WorkerJobsRoute: WorkerJobsRoute,
+  WorkerProfileRoute: WorkerProfileRoute,
+}
+
+const WorkerRouteWithChildren =
+  WorkerRoute._addFileChildren(WorkerRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ClientRoute: ClientRouteWithChildren,
+  LoginRoute: LoginRoute,
+  RegisterRoute: RegisterRoute,
+  WorkerRoute: WorkerRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

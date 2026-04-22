@@ -1,26 +1,21 @@
 import { createFileRoute } from "@tanstack/react-router";
 
+import { HomePage } from "@/pages/HomePage";
+
 export const Route = createFileRoute("/")({
-  component: Index,
+  head: () => ({
+    meta: [
+      { title: "ViaPathHub | Trusted services in Tagum City" },
+      {
+        name: "description",
+        content: "Find massage therapists, nail technicians, plumbers, electricians, and cleaners in Tagum City with ViaPathHub.",
+      },
+      { property: "og:title", content: "ViaPathHub | Trusted services in Tagum City" },
+      {
+        property: "og:description",
+        content: "A mobile-first marketplace MVP connecting clients and skilled workers in Tagum City, Davao del Norte.",
+      },
+    ],
+  }),
+  component: HomePage,
 });
-
-// IMPORTANT: Replace this placeholder. For sites with multiple pages (About, Services, Contact, etc.),
-// create separate route files (about.tsx, services.tsx, contact.tsx) — don't put all pages in this file.
-function PlaceholderIndex() {
-  return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
-    </div>
-  );
-}
-
-function Index() {
-  return <PlaceholderIndex />;
-}

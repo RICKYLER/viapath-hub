@@ -26,56 +26,14 @@ function NotFoundComponent() {
 }
 
 export const Route = createRootRouteWithContext<{ auth: AuthStore }>()({
-  head: () => ({
-    meta: [
-      { charSet: "utf-8" },
-      { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "ViaPathHub | Local service marketplace" },
-      {
-        name: "description",
-        content: "ViaPathHub connects clients with skilled workers in Tagum City for trusted home, care, and repair services.",
-      },
-      { name: "author", content: "ViaPathHub" },
-      { property: "og:type", content: "website" },
-      { property: "og:title", content: "ViaPathHub | Local service marketplace" },
-      {
-        property: "og:description",
-        content: "Book reliable local workers or offer flexible services through ViaPathHub.",
-      },
-      { name: "twitter:card", content: "summary_large_image" },
-    ],
-    links: [
-      {
-        rel: "stylesheet",
-        href: appCss,
-      },
-    ],
-  }),
-  shellComponent: RootShell,
   component: RootComponent,
   notFoundComponent: NotFoundComponent,
 });
 
-function RootShell({ children }: { children: React.ReactNode }) {
-  return (
-    <html lang="en">
-      <head>
-        <HeadContent />
-      </head>
-      <body>
-        {children}
-        <Scripts />
-      </body>
-    </html>
-  );
-}
-
 function RootComponent() {
   return (
-    <AppProviders>
-      <AppShell>
-        <Outlet />
-      </AppShell>
-    </AppProviders>
+    <AppShell>
+      <Outlet />
+    </AppShell>
   );
 }

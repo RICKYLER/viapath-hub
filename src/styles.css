@@ -245,7 +245,9 @@
   }
 
   .hero-card {
-    @apply surface-elevated relative overflow-hidden p-6 sm:p-8;
+    @apply relative overflow-hidden border border-border/60 bg-card p-6 sm:p-8;
+    border-radius: var(--radius-3xl);
+    box-shadow: var(--shadow-lift);
   }
 
   .hero-card::after {
@@ -269,7 +271,9 @@
   }
 
   .form-panel {
-    @apply surface-elevated p-5 sm:p-6;
+    @apply border border-border/60 bg-card p-5 sm:p-6;
+    border-radius: var(--radius-3xl);
+    box-shadow: var(--shadow-lift);
   }
 
   .tag-soft {

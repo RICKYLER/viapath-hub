@@ -98,12 +98,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (!user || user.role !== "worker" || !user.workerId) return;
 
+    const workerId = user.workerId;
+
     setWorkers((current) => {
-      if (current.some((worker) => worker.id === user.workerId)) return current;
+      if (current.some((worker) => worker.id === workerId)) return current;
 
       return [
         {
-          id: user.workerId,
+          id: workerId,
           name: user.name,
           service: "Cleaning",
           rating: 4.7,

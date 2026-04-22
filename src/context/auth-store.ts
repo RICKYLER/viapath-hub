@@ -29,7 +29,18 @@ const defaultUsers: Record<UserRole, AuthUser> = {
   },
 };
 
-let currentUser: AuthUser | null = null;
+const STORAGE_KEY = "viapathhub_user";
+
+let currentUser: AuthUser | null = (() => {
+  if (typeof window === "undefined") return null;
+  const saved = localStorage.getItem(STORAGE_KEY);
+  if (!saved) return null;
+  try {
+    return JSON.parse(saved);
+  } catch {
+    return null;
+  }
+})();
 
 const emit = () => {
   listeners.forEach((listener) => listener());
@@ -68,6 +79,7 @@ export const authStore = {
       location: input.location?.trim() || base.location,
       workerId: input.role === "worker" ? base.workerId ?? `${slugify(input.name || base.name)}-profile` : undefined,
     };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(currentUser));
     emit();
     return currentUser;
   },
@@ -80,11 +92,13 @@ export const authStore = {
       location: input.location.trim(),
       workerId: input.role === "worker" ? `worker-${Date.now()}` : undefined,
     };
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(currentUser));
     emit();
     return currentUser;
   },
   logout() {
     currentUser = null;
+    localStorage.removeItem(STORAGE_KEY);
     emit();
   },
 };

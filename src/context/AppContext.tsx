@@ -11,7 +11,8 @@ import { useRouter } from "@tanstack/react-router";
 
 import { workers as initialWorkers, serviceTypes } from "@/data/workers";
 import { authStore } from "@/context/auth-store";
-import type { AuthUser, Booking, BookingStatus, WorkerProfile } from "@/context/types";
+import type { AuthUser, Booking, BookingStatus, Transaction, WorkerProfile } from "@/context/types";
+import { fetchWorkers, createBookingDb } from "@/lib/api";
 
 interface CreateBookingInput {
   workerId: string;
@@ -35,6 +36,7 @@ interface AppContextValue {
   clientBookings: Booking[];
   workerBookings: Booking[];
   topWorkers: WorkerProfile[];
+  transactions: Transaction[];
   login: typeof authStore.login;
   register: typeof authStore.register;
   logout: typeof authStore.logout;
@@ -64,6 +66,9 @@ const seededBookings: Booking[] = [
     location: "Visayan Village, Tagum City",
     note: "Need a relaxing home session after office hours.",
     status: "accepted",
+    price: 500,
+    lat: 7.4380,
+    lng: 125.8220,
     statusHistory: [
       createStatusHistoryItem("pending", "2026-04-22T09:15:00.000Z"),
       createStatusHistoryItem("accepted", "2026-04-22T10:00:00.000Z"),
@@ -80,6 +85,9 @@ const seededBookings: Booking[] = [
     location: "Mankilam, Tagum City",
     note: "Kitchen sink leak needs checking before noon.",
     status: "pending",
+    price: 350,
+    lat: 7.4650,
+    lng: 125.7950,
     statusHistory: [createStatusHistoryItem("pending", "2026-04-22T11:30:00.000Z")],
   },
   {
@@ -93,7 +101,31 @@ const seededBookings: Booking[] = [
     location: "Magugpo South, Tagum City",
     note: "Deep tissue massage after a basketball game.",
     status: "pending",
+    price: 500,
+    lat: 7.4478,
+    lng: 125.8094,
     statusHistory: [createStatusHistoryItem("pending", "2026-04-22T12:10:00.000Z")],
+  },
+];
+
+const seededTransactions: Transaction[] = [
+  {
+    id: "t1",
+    bookingId: "b1",
+    amount: 500,
+    date: "2026-04-22T10:05:00.000Z",
+    status: "completed",
+    type: "payment",
+    counterpartName: "Lina Mae Torres",
+  },
+  {
+    id: "t2",
+    bookingId: "b0", // Historical
+    amount: 450,
+    date: "2026-04-20T16:20:00.000Z",
+    status: "completed",
+    type: "payment",
+    counterpartName: "Marco Silva",
   },
 ];
 
@@ -104,6 +136,17 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const user = useSyncExternalStore(authStore.subscribe, authStore.getSnapshot, authStore.getSnapshot);
   const [workers, setWorkers] = useState<WorkerProfile[]>(initialWorkers);
   const [bookings, setBookings] = useState<Booking[]>(seededBookings);
+  const [transactions, setTransactions] = useState<Transaction[]>(seededTransactions);
+
+  useEffect(() => {
+    async function loadData() {
+      const dbWorkers = await fetchWorkers();
+      if (dbWorkers && dbWorkers.length > 0) {
+        setWorkers(dbWorkers);
+      }
+    }
+    loadData();
+  }, []);
 
   useEffect(() => {
     router.invalidate();
@@ -130,6 +173,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
           verified: true,
           completedJobs: 0,
           responseTime: "Replies in 20 mins",
+          lat: 7.4478,
+          lng: 125.8094,
         },
         ...current,
       ];
@@ -231,6 +276,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       clientBookings,
       workerBookings,
       topWorkers,
+      transactions,
       login: authStore.login,
       register: authStore.register,
       logout: authStore.logout,
@@ -240,7 +286,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       getWorkerById: (workerId: string) => workers.find((worker) => worker.id === workerId),
       getBookingsByStatus: (status: BookingStatus) => bookings.filter((booking) => booking.status === status),
     }),
-    [bookings, clientBookings, topWorkers, user, workerBookings, workers],
+    [bookings, clientBookings, topWorkers, transactions, user, workerBookings, workers],
   );
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

@@ -21,6 +21,8 @@ export interface WorkerProfile {
   verified: boolean;
   completedJobs: number;
   responseTime: string;
+  lat: number;
+  lng: number;
 }
 
 export type BookingStatus = "pending" | "accepted" | "completed" | "cancelled";
@@ -42,4 +44,17 @@ export interface Booking {
   note: string;
   status: BookingStatus;
   statusHistory: BookingStatusHistoryItem[];
+  price?: number;
+  lat?: number;
+  lng?: number;
+}
+
+export interface Transaction {
+  id: string;
+  bookingId: string;
+  amount: number;
+  date: string;
+  status: "completed" | "pending" | "refunded";
+  type: "payment" | "payout";
+  counterpartName: string;
 }

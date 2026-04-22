@@ -1,11 +1,15 @@
 import { format } from "date-fns";
-import { Ban, CalendarDays, CheckCheck, Clock3, MapPin, NotebookPen } from "lucide-react";
+import { Ban, CalendarDays, CheckCheck, Clock3, CreditCard, MapPin, MapPinned, MessageSquare, NotebookPen } from "lucide-react";
+import { useState } from "react";
+import { Link } from "@tanstack/react-router";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useAppContext } from "@/context/AppContext";
 import type { Booking } from "@/context/types";
 import { toast } from "sonner";
+import { PaymentModal } from "@/components/PaymentModal";
+import { ReviewForm } from "@/components/ReviewForm";
 
 interface BookingCardProps {
   booking: Booking;
@@ -14,6 +18,7 @@ interface BookingCardProps {
 
 export function BookingCard({ booking, perspective }: BookingCardProps) {
   const { updateBookingStatus } = useAppContext();
+  const [showPayment, setShowPayment] = useState(false);
   const counterpart = perspective === "client" ? booking.workerName : booking.clientName;
   const isAcceptableDate = new Date(booking.date).getTime() > Date.now();
 
@@ -76,6 +81,16 @@ export function BookingCard({ booking, perspective }: BookingCardProps) {
         </div>
 
         <div className="flex flex-wrap gap-3">
+          <Button asChild size="sm" variant="outline">
+            <Link 
+              to={perspective === "client" ? "/client/chat/$workerId" : "/worker/chat/$clientId"}
+              params={perspective === "client" ? { workerId: booking.workerId } : { clientId: booking.clientId }}
+            >
+              <MessageSquare size={16} />
+              Chat
+            </Link>
+          </Button>
+
           {perspective === "worker" && booking.status === "pending" ? (
             <Button
               size="sm"
@@ -87,11 +102,37 @@ export function BookingCard({ booking, perspective }: BookingCardProps) {
             </Button>
           ) : null}
 
-          {perspective === "worker" && booking.status === "accepted" ? (
-            <Button size="sm" variant="outline" onClick={() => applyStatus("completed", "Only accepted bookings can be completed.")}>
+          {perspective === "worker" && booking.status === "accepted" && (
+            <Button 
+              size="sm" 
+              variant="outline"
+              asChild
+            >
+              <Link 
+                to="/worker/jobs" 
+                search={{ 
+                  view: 'map',
+                  lat: booking.lat,
+                  lng: booking.lng
+                }}
+              >
+                <MapPinned size={16} className="mr-2" />
+                Locate Job
+              </Link>
+            </Button>
+          )}
+          {perspective === "worker" && booking.status === "accepted" && (
+            <Button size="sm" onClick={() => updateBookingStatus(booking.id, "completed")}>
               Mark completed
             </Button>
-          ) : null}
+          )}
+
+          {perspective === "client" && ["accepted", "completed"].includes(booking.status) && (
+            <Button size="sm" onClick={() => setShowPayment(true)}>
+              <CreditCard size={16} />
+              {booking.status === "completed" ? "Pay Now" : "Pre-pay"}
+            </Button>
+          )}
 
           {["pending", "accepted"].includes(booking.status) ? (
             <Button
@@ -104,6 +145,31 @@ export function BookingCard({ booking, perspective }: BookingCardProps) {
             </Button>
           ) : null}
         </div>
+
+        {perspective === "client" && booking.status === "completed" && (
+          <div className="mt-4 border-t border-border/50 pt-4 animate-in fade-in slide-in-from-bottom-2 duration-500">
+            <ReviewForm 
+              workerId={booking.workerId} 
+              jobId={booking.id} 
+              onSubmit={(data) => {
+                toast.success("Review submitted! Thank you for your feedback.");
+              }} 
+            />
+          </div>
+        )}
+
+        <PaymentModal 
+          isOpen={showPayment} 
+          onClose={() => setShowPayment(false)}
+          amount={500} // Mock amount for MVP
+          workerName={booking.workerName}
+          onSuccess={() => {
+            toast.success("Payment successful!");
+            if (booking.status === "accepted") {
+              applyStatus("completed", "Booking marked as completed after payment.");
+            }
+          }}
+        />
 
         {perspective === "worker" && booking.status === "pending" && !isAcceptableDate ? (
           <p className="text-sm text-destructive">This booking date has already passed, so it can no longer be accepted.</p>

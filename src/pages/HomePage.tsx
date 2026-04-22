@@ -2,6 +2,7 @@ import { ArrowRight, BriefcaseBusiness, Clock3, MapPinned, ShieldCheck } from "l
 import { Link } from "@tanstack/react-router";
 
 import { WorkerCard } from "@/components/WorkerCard";
+import { Testimonials } from "@/components/Testimonials";
 import { Button } from "@/components/ui/button";
 import { useAppContext } from "@/context/AppContext";
 
@@ -109,6 +110,8 @@ export function HomePage() {
           </article>
         ))}
       </section>
+
+      <Testimonials />
 
       <section className="space-y-5">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">

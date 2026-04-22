@@ -1,12 +1,13 @@
 import { Link } from "@tanstack/react-router";
-import { BriefcaseBusiness, MapPin, ShieldCheck, Star } from "lucide-react";
+import { BriefcaseBusiness, MapPin, MessageSquare, ShieldCheck, Star } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { RatingStars } from "@/components/RatingStars";
+import { ReviewList } from "@/components/ReviewList";
 import { useAppContext } from "@/context/AppContext";
 
 export function WorkerProfilePage({ workerId }: { workerId: string }) {
-  const { getWorkerById } = useAppContext();
+  const { getWorkerById, user } = useAppContext();
   const worker = getWorkerById(workerId);
 
   if (!worker) {
@@ -42,11 +43,30 @@ export function WorkerProfilePage({ workerId }: { workerId: string }) {
             </div>
           ) : null}
         </div>
-        <Button asChild className="w-full" size="lg">
-          <Link to="/client/booking/$workerId" params={{ workerId: worker.id }}>
-            Book this worker
-          </Link>
-        </Button>
+        <div className="flex flex-col gap-3">
+          {user?.id !== worker.id && (
+            <>
+              <Button asChild className="w-full" size="lg">
+                <Link to="/client/booking/$workerId" params={{ workerId: worker.id }}>
+                  Book this worker
+                </Link>
+              </Button>
+              <Button asChild variant="outline" className="w-full" size="lg">
+                <Link to="/client/chat/$workerId" params={{ workerId: worker.id }}>
+                  <MessageSquare size={18} className="mr-2" />
+                  Chat with worker
+                </Link>
+              </Button>
+            </>
+          )}
+          {user?.id === worker.id && (
+            <Button asChild variant="outline" className="w-full" size="lg">
+              <Link to="/worker/profile">
+                Edit my profile
+              </Link>
+            </Button>
+          )}
+        </div>
       </aside>
 
       <section className="space-y-5">
@@ -86,6 +106,28 @@ export function WorkerProfilePage({ workerId }: { workerId: string }) {
             </div>
           </div>
         </article>
+
+        <section className="space-y-4">
+          <h2 className="text-xl font-bold text-foreground">Reviews and Feedback</h2>
+          <ReviewList 
+            reviews={[
+              {
+                id: 'r1',
+                reviewerName: 'Patricia Gomez',
+                rating: 5,
+                comment: 'Excellent service! Very professional and punctual. Highly recommended for anyone in Tagum.',
+                date: '2 days ago'
+              },
+              {
+                id: 'r2',
+                reviewerName: 'Lyra Santos',
+                rating: 4,
+                comment: 'Very good experience. The quality of work was great, just a minor delay in arrival but communicated well.',
+                date: '1 week ago'
+              }
+            ]} 
+          />
+        </section>
       </section>
     </div>
   );

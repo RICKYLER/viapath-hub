@@ -1,5 +1,5 @@
 import { Link, useLocation } from "@tanstack/react-router";
-import { BriefcaseBusiness, CalendarCheck2, Compass, House, LogOut, UserRound } from "lucide-react";
+import { BriefcaseBusiness, CalendarCheck2, Compass, House, LogOut, MessageSquare, UserRound } from "lucide-react";
 
 import { RoleBadge } from "@/components/RoleBadge";
 import { Button } from "@/components/ui/button";
@@ -15,11 +15,13 @@ const clientLinks = [
   { to: "/client/dashboard", label: "Dashboard", icon: House },
   { to: "/client/search", label: "Find workers", icon: Compass },
   { to: "/client/bookings", label: "Bookings", icon: CalendarCheck2 },
+  { to: "/client/messages", label: "Messages", icon: MessageSquare },
 ] as const;
 
 const workerLinks = [
   { to: "/worker/dashboard", label: "Dashboard", icon: House },
   { to: "/worker/jobs", label: "My jobs", icon: CalendarCheck2 },
+  { to: "/worker/messages", label: "Messages", icon: MessageSquare },
   { to: "/worker/profile", label: "Edit profile", icon: UserRound },
 ] as const;
 

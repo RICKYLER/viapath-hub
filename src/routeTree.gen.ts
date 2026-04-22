@@ -15,12 +15,16 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as ClientRouteImport } from './routes/client'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as WorkerProfileRouteImport } from './routes/worker.profile'
+import { Route as WorkerMessagesRouteImport } from './routes/worker.messages'
 import { Route as WorkerJobsRouteImport } from './routes/worker.jobs'
 import { Route as WorkerDashboardRouteImport } from './routes/worker.dashboard'
 import { Route as ClientSearchRouteImport } from './routes/client.search'
+import { Route as ClientMessagesRouteImport } from './routes/client.messages'
 import { Route as ClientDashboardRouteImport } from './routes/client.dashboard'
 import { Route as ClientBookingsRouteImport } from './routes/client.bookings'
+import { Route as WorkerChatClientIdRouteImport } from './routes/worker.chat.$clientId'
 import { Route as ClientWorkersWorkerIdRouteImport } from './routes/client.workers.$workerId'
+import { Route as ClientChatWorkerIdRouteImport } from './routes/client.chat.$workerId'
 import { Route as ClientBookingWorkerIdRouteImport } from './routes/client.booking.$workerId'
 
 const WorkerRoute = WorkerRouteImport.update({
@@ -53,6 +57,11 @@ const WorkerProfileRoute = WorkerProfileRouteImport.update({
   path: '/profile',
   getParentRoute: () => WorkerRoute,
 } as any)
+const WorkerMessagesRoute = WorkerMessagesRouteImport.update({
+  id: '/messages',
+  path: '/messages',
+  getParentRoute: () => WorkerRoute,
+} as any)
 const WorkerJobsRoute = WorkerJobsRouteImport.update({
   id: '/jobs',
   path: '/jobs',
@@ -68,6 +77,11 @@ const ClientSearchRoute = ClientSearchRouteImport.update({
   path: '/search',
   getParentRoute: () => ClientRoute,
 } as any)
+const ClientMessagesRoute = ClientMessagesRouteImport.update({
+  id: '/messages',
+  path: '/messages',
+  getParentRoute: () => ClientRoute,
+} as any)
 const ClientDashboardRoute = ClientDashboardRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
@@ -78,9 +92,19 @@ const ClientBookingsRoute = ClientBookingsRouteImport.update({
   path: '/bookings',
   getParentRoute: () => ClientRoute,
 } as any)
+const WorkerChatClientIdRoute = WorkerChatClientIdRouteImport.update({
+  id: '/chat/$clientId',
+  path: '/chat/$clientId',
+  getParentRoute: () => WorkerRoute,
+} as any)
 const ClientWorkersWorkerIdRoute = ClientWorkersWorkerIdRouteImport.update({
   id: '/workers/$workerId',
   path: '/workers/$workerId',
+  getParentRoute: () => ClientRoute,
+} as any)
+const ClientChatWorkerIdRoute = ClientChatWorkerIdRouteImport.update({
+  id: '/chat/$workerId',
+  path: '/chat/$workerId',
   getParentRoute: () => ClientRoute,
 } as any)
 const ClientBookingWorkerIdRoute = ClientBookingWorkerIdRouteImport.update({
@@ -97,12 +121,16 @@ export interface FileRoutesByFullPath {
   '/worker': typeof WorkerRouteWithChildren
   '/client/bookings': typeof ClientBookingsRoute
   '/client/dashboard': typeof ClientDashboardRoute
+  '/client/messages': typeof ClientMessagesRoute
   '/client/search': typeof ClientSearchRoute
   '/worker/dashboard': typeof WorkerDashboardRoute
   '/worker/jobs': typeof WorkerJobsRoute
+  '/worker/messages': typeof WorkerMessagesRoute
   '/worker/profile': typeof WorkerProfileRoute
   '/client/booking/$workerId': typeof ClientBookingWorkerIdRoute
+  '/client/chat/$workerId': typeof ClientChatWorkerIdRoute
   '/client/workers/$workerId': typeof ClientWorkersWorkerIdRoute
+  '/worker/chat/$clientId': typeof WorkerChatClientIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -112,12 +140,16 @@ export interface FileRoutesByTo {
   '/worker': typeof WorkerRouteWithChildren
   '/client/bookings': typeof ClientBookingsRoute
   '/client/dashboard': typeof ClientDashboardRoute
+  '/client/messages': typeof ClientMessagesRoute
   '/client/search': typeof ClientSearchRoute
   '/worker/dashboard': typeof WorkerDashboardRoute
   '/worker/jobs': typeof WorkerJobsRoute
+  '/worker/messages': typeof WorkerMessagesRoute
   '/worker/profile': typeof WorkerProfileRoute
   '/client/booking/$workerId': typeof ClientBookingWorkerIdRoute
+  '/client/chat/$workerId': typeof ClientChatWorkerIdRoute
   '/client/workers/$workerId': typeof ClientWorkersWorkerIdRoute
+  '/worker/chat/$clientId': typeof WorkerChatClientIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -128,12 +160,16 @@ export interface FileRoutesById {
   '/worker': typeof WorkerRouteWithChildren
   '/client/bookings': typeof ClientBookingsRoute
   '/client/dashboard': typeof ClientDashboardRoute
+  '/client/messages': typeof ClientMessagesRoute
   '/client/search': typeof ClientSearchRoute
   '/worker/dashboard': typeof WorkerDashboardRoute
   '/worker/jobs': typeof WorkerJobsRoute
+  '/worker/messages': typeof WorkerMessagesRoute
   '/worker/profile': typeof WorkerProfileRoute
   '/client/booking/$workerId': typeof ClientBookingWorkerIdRoute
+  '/client/chat/$workerId': typeof ClientChatWorkerIdRoute
   '/client/workers/$workerId': typeof ClientWorkersWorkerIdRoute
+  '/worker/chat/$clientId': typeof WorkerChatClientIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -145,12 +181,16 @@ export interface FileRouteTypes {
     | '/worker'
     | '/client/bookings'
     | '/client/dashboard'
+    | '/client/messages'
     | '/client/search'
     | '/worker/dashboard'
     | '/worker/jobs'
+    | '/worker/messages'
     | '/worker/profile'
     | '/client/booking/$workerId'
+    | '/client/chat/$workerId'
     | '/client/workers/$workerId'
+    | '/worker/chat/$clientId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -160,12 +200,16 @@ export interface FileRouteTypes {
     | '/worker'
     | '/client/bookings'
     | '/client/dashboard'
+    | '/client/messages'
     | '/client/search'
     | '/worker/dashboard'
     | '/worker/jobs'
+    | '/worker/messages'
     | '/worker/profile'
     | '/client/booking/$workerId'
+    | '/client/chat/$workerId'
     | '/client/workers/$workerId'
+    | '/worker/chat/$clientId'
   id:
     | '__root__'
     | '/'
@@ -175,12 +219,16 @@ export interface FileRouteTypes {
     | '/worker'
     | '/client/bookings'
     | '/client/dashboard'
+    | '/client/messages'
     | '/client/search'
     | '/worker/dashboard'
     | '/worker/jobs'
+    | '/worker/messages'
     | '/worker/profile'
     | '/client/booking/$workerId'
+    | '/client/chat/$workerId'
     | '/client/workers/$workerId'
+    | '/worker/chat/$clientId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -235,6 +283,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof WorkerProfileRouteImport
       parentRoute: typeof WorkerRoute
     }
+    '/worker/messages': {
+      id: '/worker/messages'
+      path: '/messages'
+      fullPath: '/worker/messages'
+      preLoaderRoute: typeof WorkerMessagesRouteImport
+      parentRoute: typeof WorkerRoute
+    }
     '/worker/jobs': {
       id: '/worker/jobs'
       path: '/jobs'
@@ -256,6 +311,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ClientSearchRouteImport
       parentRoute: typeof ClientRoute
     }
+    '/client/messages': {
+      id: '/client/messages'
+      path: '/messages'
+      fullPath: '/client/messages'
+      preLoaderRoute: typeof ClientMessagesRouteImport
+      parentRoute: typeof ClientRoute
+    }
     '/client/dashboard': {
       id: '/client/dashboard'
       path: '/dashboard'
@@ -270,11 +332,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ClientBookingsRouteImport
       parentRoute: typeof ClientRoute
     }
+    '/worker/chat/$clientId': {
+      id: '/worker/chat/$clientId'
+      path: '/chat/$clientId'
+      fullPath: '/worker/chat/$clientId'
+      preLoaderRoute: typeof WorkerChatClientIdRouteImport
+      parentRoute: typeof WorkerRoute
+    }
     '/client/workers/$workerId': {
       id: '/client/workers/$workerId'
       path: '/workers/$workerId'
       fullPath: '/client/workers/$workerId'
       preLoaderRoute: typeof ClientWorkersWorkerIdRouteImport
+      parentRoute: typeof ClientRoute
+    }
+    '/client/chat/$workerId': {
+      id: '/client/chat/$workerId'
+      path: '/chat/$workerId'
+      fullPath: '/client/chat/$workerId'
+      preLoaderRoute: typeof ClientChatWorkerIdRouteImport
       parentRoute: typeof ClientRoute
     }
     '/client/booking/$workerId': {
@@ -290,16 +366,20 @@ declare module '@tanstack/react-router' {
 interface ClientRouteChildren {
   ClientBookingsRoute: typeof ClientBookingsRoute
   ClientDashboardRoute: typeof ClientDashboardRoute
+  ClientMessagesRoute: typeof ClientMessagesRoute
   ClientSearchRoute: typeof ClientSearchRoute
   ClientBookingWorkerIdRoute: typeof ClientBookingWorkerIdRoute
+  ClientChatWorkerIdRoute: typeof ClientChatWorkerIdRoute
   ClientWorkersWorkerIdRoute: typeof ClientWorkersWorkerIdRoute
 }
 
 const ClientRouteChildren: ClientRouteChildren = {
   ClientBookingsRoute: ClientBookingsRoute,
   ClientDashboardRoute: ClientDashboardRoute,
+  ClientMessagesRoute: ClientMessagesRoute,
   ClientSearchRoute: ClientSearchRoute,
   ClientBookingWorkerIdRoute: ClientBookingWorkerIdRoute,
+  ClientChatWorkerIdRoute: ClientChatWorkerIdRoute,
   ClientWorkersWorkerIdRoute: ClientWorkersWorkerIdRoute,
 }
 
@@ -309,13 +389,17 @@ const ClientRouteWithChildren =
 interface WorkerRouteChildren {
   WorkerDashboardRoute: typeof WorkerDashboardRoute
   WorkerJobsRoute: typeof WorkerJobsRoute
+  WorkerMessagesRoute: typeof WorkerMessagesRoute
   WorkerProfileRoute: typeof WorkerProfileRoute
+  WorkerChatClientIdRoute: typeof WorkerChatClientIdRoute
 }
 
 const WorkerRouteChildren: WorkerRouteChildren = {
   WorkerDashboardRoute: WorkerDashboardRoute,
   WorkerJobsRoute: WorkerJobsRoute,
+  WorkerMessagesRoute: WorkerMessagesRoute,
   WorkerProfileRoute: WorkerProfileRoute,
+  WorkerChatClientIdRoute: WorkerChatClientIdRoute,
 }
 
 const WorkerRouteWithChildren =

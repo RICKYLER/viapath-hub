@@ -9,16 +9,19 @@ import { DashboardShell } from "@/layouts/DashboardShell";
 export function SearchWorkersPage() {
   const { workers, serviceTypes } = useAppContext();
   const [service, setService] = useState<string>("all");
+  const [location, setLocation] = useState<string>("tagum-city-davao-del-norte");
   const [query, setQuery] = useState("");
 
   const filteredWorkers = useMemo(() => {
     return workers.filter((worker) => {
       const matchesService = service === "all" || worker.service === service;
+      const matchesLocation =
+        location === "all" || worker.location.toLowerCase().includes("tagum city, davao del norte");
       const haystack = `${worker.name} ${worker.location} ${worker.about} ${worker.skills.join(" ")}`.toLowerCase();
       const matchesQuery = haystack.includes(query.toLowerCase());
-      return matchesService && matchesQuery;
+      return matchesService && matchesLocation && matchesQuery;
     });
-  }, [query, service, workers]);
+  }, [location, query, service, workers]);
 
   return (
     <DashboardShell
@@ -26,7 +29,7 @@ export function SearchWorkersPage() {
       title="Browse skilled professionals near you"
       description="Filter by service type and compare trusted local workers before booking."
     >
-      <section className="surface-panel grid gap-4 p-5 md:grid-cols-[220px_minmax(0,1fr)]">
+      <section className="surface-panel grid gap-4 p-5 md:grid-cols-[220px_220px_minmax(0,1fr)]">
         <div className="space-y-2">
           <p className="text-sm font-semibold text-foreground">Service type</p>
           <Select value={service} onValueChange={setService}>
@@ -40,6 +43,18 @@ export function SearchWorkersPage() {
                   {item}
                 </SelectItem>
               ))}
+            </SelectContent>
+          </Select>
+        </div>
+        <div className="space-y-2">
+          <p className="text-sm font-semibold text-foreground">Location</p>
+          <Select value={location} onValueChange={setLocation}>
+            <SelectTrigger>
+              <SelectValue placeholder="Select a location" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All locations</SelectItem>
+              <SelectItem value="tagum-city-davao-del-norte">Tagum City, Davao del Norte</SelectItem>
             </SelectContent>
           </Select>
         </div>

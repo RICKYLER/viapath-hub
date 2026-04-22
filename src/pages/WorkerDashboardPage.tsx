@@ -11,7 +11,7 @@ export function WorkerDashboardPage() {
     <DashboardShell
       eyebrow="Worker dashboard"
       title={`Welcome, ${user?.name ?? "Worker"}`}
-      description="Manage incoming client requests, stay on top of confirmed jobs, and keep your profile ready for more bookings."
+      description="Manage incoming client requests, stay on top of accepted jobs, and keep your profile ready for more bookings."
       aside={
         <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-1">
           <div>
@@ -19,8 +19,8 @@ export function WorkerDashboardPage() {
             <p className="mt-1 text-2xl font-bold text-foreground">{getBookingsByStatus("pending").length}</p>
           </div>
           <div>
-            <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Confirmed</p>
-            <p className="mt-1 text-2xl font-bold text-foreground">{getBookingsByStatus("confirmed").length}</p>
+            <p className="text-xs uppercase tracking-[0.18em] text-muted-foreground">Accepted</p>
+            <p className="mt-1 text-2xl font-bold text-foreground">{getBookingsByStatus("accepted").length}</p>
           </div>
         </div>
       }

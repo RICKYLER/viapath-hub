@@ -7,7 +7,6 @@ import {
   useSyncExternalStore,
   type ReactNode,
 } from "react";
-import { useRouter } from "@tanstack/react-router";
 
 import { workers as initialWorkers, serviceTypes } from "@/data/workers";
 import { authStore } from "@/context/auth-store";
@@ -132,7 +131,6 @@ const seededTransactions: Transaction[] = [
 const AppContext = createContext<AppContextValue | undefined>(undefined);
 
 export function AppProvider({ children }: { children: ReactNode }) {
-  const router = useRouter();
   const user = useSyncExternalStore(authStore.subscribe, authStore.getSnapshot, authStore.getSnapshot);
   const [workers, setWorkers] = useState<WorkerProfile[]>(initialWorkers);
   const [bookings, setBookings] = useState<Booking[]>(seededBookings);
@@ -147,10 +145,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
     }
     loadData();
   }, []);
-
-  useEffect(() => {
-    router.invalidate();
-  }, [router, user?.id, user?.role]);
 
   useEffect(() => {
     if (!user || user.role !== "worker" || !user.workerId) return;

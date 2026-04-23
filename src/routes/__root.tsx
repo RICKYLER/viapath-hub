@@ -30,10 +30,13 @@ export const Route = createRootRouteWithContext<{ auth: AuthStore }>()({
   notFoundComponent: NotFoundComponent,
 });
 
+import { ServiceMatchmaker } from "@/components/ServiceMatchmaker";
+
 function RootComponent() {
   return (
     <AppShell>
       <Outlet />
+      <ServiceMatchmaker />
     </AppShell>
   );
 }

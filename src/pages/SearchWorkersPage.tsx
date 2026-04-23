@@ -10,20 +10,23 @@ import { MapLocator } from "@/components/MapLocator";
 export function SearchWorkersPage() {
   const { workers, serviceTypes } = useAppContext();
   const [service, setService] = useState<string>("all");
-  const [location, setLocation] = useState<string>("tagum-city-davao-del-norte");
+  const [barangay, setBarangay] = useState<string>("all");
   const [query, setQuery] = useState("");
   const [showMap, setShowMap] = useState(false);
+
+  const barangays = useMemo(() => {
+    return Array.from(new Set(workers.map(w => w.barangay))).sort();
+  }, [workers]);
 
   const filteredWorkers = useMemo(() => {
     return workers.filter((worker) => {
       const matchesService = service === "all" || worker.service === service;
-      const matchesLocation =
-        location === "all" || worker.location.toLowerCase().includes("tagum city, davao del norte");
+      const matchesBarangay = barangay === "all" || worker.barangay === barangay;
       const haystack = `${worker.name} ${worker.location} ${worker.about} ${worker.skills.join(" ")}`.toLowerCase();
       const matchesQuery = haystack.includes(query.toLowerCase());
-      return matchesService && matchesLocation && matchesQuery;
+      return matchesService && matchesBarangay && matchesQuery;
     });
-  }, [location, query, service, workers]);
+  }, [barangay, query, service, workers]);
 
   return (
     <DashboardShell
@@ -50,14 +53,18 @@ export function SearchWorkersPage() {
             </Select>
           </div>
           <div className="space-y-2">
-            <p className="text-sm font-semibold text-foreground">Location</p>
-            <Select value={location} onValueChange={setLocation}>
+            <p className="text-sm font-semibold text-foreground">Barangay (Tagum)</p>
+            <Select value={barangay} onValueChange={setBarangay}>
               <SelectTrigger>
-                <SelectValue placeholder="Select a location" />
+                <SelectValue placeholder="Select a barangay" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All locations</SelectItem>
-                <SelectItem value="tagum-city-davao-del-norte">Tagum City, Davao del Norte</SelectItem>
+                <SelectItem value="all">All Barangays</SelectItem>
+                {barangays.map((b) => (
+                  <SelectItem key={b} value={b}>
+                    {b}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>

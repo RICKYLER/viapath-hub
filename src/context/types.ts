@@ -19,6 +19,11 @@ export interface WorkerProfile {
   image: string;
   skills: string[];
   verified: boolean;
+  isIdVerified: boolean;
+  hasPoliceClearance: boolean;
+  hasBarangayClearance: boolean;
+  certifications: string[];
+  barangay: string;
   completedJobs: number;
   responseTime: string;
   lat: number;
@@ -45,6 +50,7 @@ export interface Booking {
   status: BookingStatus;
   statusHistory: BookingStatusHistoryItem[];
   price?: number;
+  isEscrowed?: boolean;
   lat?: number;
   lng?: number;
 }

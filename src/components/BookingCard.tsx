@@ -1,5 +1,5 @@
 import { format } from "date-fns";
-import { Ban, CalendarDays, CheckCheck, Clock3, CreditCard, MapPin, MapPinned, MessageSquare, NotebookPen } from "lucide-react";
+import { Ban, CalendarDays, CheckCheck, Clock3, CreditCard, MapPin, MapPinned, MessageSquare, NotebookPen, ShieldCheck } from "lucide-react";
 import { useState } from "react";
 import { Link } from "@tanstack/react-router";
 
@@ -40,7 +40,15 @@ export function BookingCard({ booking, perspective }: BookingCardProps) {
             <h3 className="mt-1 text-lg font-bold text-foreground">{counterpart}</h3>
             <p className="text-sm text-primary">{booking.service}</p>
           </div>
-          <span className={`status-pill ${booking.status}`}>{booking.status}</span>
+          <div className="flex items-center gap-2">
+            {booking.isEscrowed && (
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-primary/10 text-primary text-[10px] font-bold uppercase tracking-wider border border-primary/20">
+                <ShieldCheck size={10} />
+                Payment in Escrow
+              </span>
+            )}
+            <span className={`status-pill ${booking.status}`}>{booking.status}</span>
+          </div>
         </div>
 
         <div className="grid gap-3 text-sm text-muted-foreground sm:grid-cols-2">

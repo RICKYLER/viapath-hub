@@ -36,12 +36,24 @@ export function WorkerProfilePage({ workerId }: { workerId: string }) {
             <BriefcaseBusiness size={16} />
             <span>{worker.completedJobs} completed jobs</span>
           </div>
-          {worker.verified ? (
-            <div className="flex items-center gap-2">
-              <ShieldCheck size={16} className="text-success" />
-              <span>Verified worker profile</span>
+          {worker.isIdVerified && (
+            <div className="flex items-center gap-2 text-primary font-medium">
+              <ShieldCheck size={16} />
+              <span>Identity Verified</span>
             </div>
-          ) : null}
+          )}
+          {worker.hasPoliceClearance && (
+            <div className="flex items-center gap-2 text-success">
+              <ShieldCheck size={16} />
+              <span>Police Clearance</span>
+            </div>
+          )}
+          {worker.hasBarangayClearance && (
+            <div className="flex items-center gap-2 text-success">
+              <ShieldCheck size={16} />
+              <span>Barangay Clearance</span>
+            </div>
+          )}
         </div>
         <div className="flex flex-col gap-3">
           {user?.id !== worker.id && (
@@ -75,6 +87,20 @@ export function WorkerProfilePage({ workerId }: { workerId: string }) {
           <p className="mt-3 body-copy">{worker.about}</p>
         </article>
 
+        {worker.certifications.length > 0 && (
+          <article className="surface-panel p-6 border-l-4 border-primary/50">
+            <h2 className="text-xl font-bold text-foreground">Certifications</h2>
+            <div className="mt-4 flex flex-wrap gap-2">
+              {worker.certifications.map((cert) => (
+                <span key={cert} className="flex items-center gap-1.5 px-3 py-1.5 bg-primary/10 text-primary text-xs font-bold rounded-full uppercase tracking-wider">
+                  <Star size={12} fill="currentColor" />
+                  {cert}
+                </span>
+              ))}
+            </div>
+          </article>
+        )}
+
         <article className="surface-panel p-6">
           <h2 className="text-xl font-bold text-foreground">Skills and specialties</h2>
           <div className="mt-4 flex flex-wrap gap-2">
@@ -101,8 +127,8 @@ export function WorkerProfilePage({ workerId }: { workerId: string }) {
               <p className="mt-2 text-2xl font-bold text-foreground">Fast</p>
             </div>
             <div className="stat-tile">
-              <p className="text-sm text-muted-foreground">Coverage</p>
-              <p className="mt-2 text-2xl font-bold text-foreground">Tagum</p>
+              <p className="text-sm text-muted-foreground">Location</p>
+              <p className="mt-2 text-lg font-bold text-foreground">{worker.barangay}</p>
             </div>
           </div>
         </article>

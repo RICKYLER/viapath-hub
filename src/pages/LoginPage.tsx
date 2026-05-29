@@ -24,7 +24,7 @@ export function LoginPage() {
     <div className="page-shell section-gap grid gap-6 lg:grid-cols-[0.9fr_minmax(0,0.7fr)] lg:items-center">
       <section className="space-y-5">
         <span className="eyebrow">Welcome back</span>
-        <h1 className="title-display text-balance">Enter the marketplace with a client, worker, or admin demo account.</h1>
+        <h1 className="title-display text-balance">Enter the marketplace with a demo account.</h1>
         <p className="body-copy max-w-xl">
           This MVP uses mock authentication only. Choose a role, add your preferred name, and jump straight into the ViaPathHub experience.
         </p>
@@ -61,7 +61,6 @@ export function LoginPage() {
             <SelectContent>
               <SelectItem value="client">Client</SelectItem>
               <SelectItem value="worker">Worker</SelectItem>
-              <SelectItem value="admin">Admin</SelectItem>
             </SelectContent>
           </Select>
         </div>

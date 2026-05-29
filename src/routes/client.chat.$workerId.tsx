@@ -14,7 +14,11 @@ function ClientChatRoute() {
 
   if (!worker || !user) {
     return (
-      <DashboardShell title="Chat">
+      <DashboardShell
+        eyebrow="Communication"
+        title="Chat"
+        description="Open a conversation with your selected worker."
+      >
         <div className="surface-panel p-6 text-sm text-muted-foreground">
           Unable to load chat.
         </div>

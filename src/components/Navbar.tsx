@@ -1,5 +1,5 @@
 import { Link, useLocation } from "@tanstack/react-router";
-import { BriefcaseBusiness, CalendarCheck2, Compass, House, LogOut, MessageSquare, UserRound } from "lucide-react";
+import { BriefcaseBusiness, CalendarCheck2, Compass, House, LogOut, MessageSquare, ShieldCheck, UserRound } from "lucide-react";
 
 import { RoleBadge } from "@/components/RoleBadge";
 import { Button } from "@/components/ui/button";
@@ -25,11 +25,15 @@ const workerLinks = [
   { to: "/worker/profile", label: "Edit profile", icon: UserRound },
 ] as const;
 
+const adminLinks = [
+  { to: "/admin/dashboard", label: "Admin", icon: ShieldCheck },
+] as const;
+
 export function Navbar() {
   const location = useLocation();
   const { user, logout } = useAppContext();
 
-  const links = user ? (user.role === "client" ? clientLinks : workerLinks) : publicLinks;
+  const links = user ? (user.role === "client" ? clientLinks : user.role === "worker" ? workerLinks : adminLinks) : publicLinks;
 
   return (
     <header className="sticky top-0 z-30 border-b border-border/60 bg-background/88 backdrop-blur-xl">

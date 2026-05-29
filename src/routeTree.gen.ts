@@ -13,6 +13,7 @@ import { Route as WorkerRouteImport } from './routes/worker'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as ClientRouteImport } from './routes/client'
+import { Route as AdminRouteImport } from './routes/admin'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as WorkerProfileRouteImport } from './routes/worker.profile'
 import { Route as WorkerMessagesRouteImport } from './routes/worker.messages'
@@ -22,6 +23,7 @@ import { Route as ClientSearchRouteImport } from './routes/client.search'
 import { Route as ClientMessagesRouteImport } from './routes/client.messages'
 import { Route as ClientDashboardRouteImport } from './routes/client.dashboard'
 import { Route as ClientBookingsRouteImport } from './routes/client.bookings'
+import { Route as AdminDashboardRouteImport } from './routes/admin.dashboard'
 import { Route as WorkerChatClientIdRouteImport } from './routes/worker.chat.$clientId'
 import { Route as ClientWorkersWorkerIdRouteImport } from './routes/client.workers.$workerId'
 import { Route as ClientChatWorkerIdRouteImport } from './routes/client.chat.$workerId'
@@ -45,6 +47,11 @@ const LoginRoute = LoginRouteImport.update({
 const ClientRoute = ClientRouteImport.update({
   id: '/client',
   path: '/client',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -92,6 +99,11 @@ const ClientBookingsRoute = ClientBookingsRouteImport.update({
   path: '/bookings',
   getParentRoute: () => ClientRoute,
 } as any)
+const AdminDashboardRoute = AdminDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => AdminRoute,
+} as any)
 const WorkerChatClientIdRoute = WorkerChatClientIdRouteImport.update({
   id: '/chat/$clientId',
   path: '/chat/$clientId',
@@ -115,10 +127,12 @@ const ClientBookingWorkerIdRoute = ClientBookingWorkerIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRouteWithChildren
   '/client': typeof ClientRouteWithChildren
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
   '/worker': typeof WorkerRouteWithChildren
+  '/admin/dashboard': typeof AdminDashboardRoute
   '/client/bookings': typeof ClientBookingsRoute
   '/client/dashboard': typeof ClientDashboardRoute
   '/client/messages': typeof ClientMessagesRoute
@@ -134,10 +148,12 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRouteWithChildren
   '/client': typeof ClientRouteWithChildren
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
   '/worker': typeof WorkerRouteWithChildren
+  '/admin/dashboard': typeof AdminDashboardRoute
   '/client/bookings': typeof ClientBookingsRoute
   '/client/dashboard': typeof ClientDashboardRoute
   '/client/messages': typeof ClientMessagesRoute
@@ -154,10 +170,12 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/admin': typeof AdminRouteWithChildren
   '/client': typeof ClientRouteWithChildren
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
   '/worker': typeof WorkerRouteWithChildren
+  '/admin/dashboard': typeof AdminDashboardRoute
   '/client/bookings': typeof ClientBookingsRoute
   '/client/dashboard': typeof ClientDashboardRoute
   '/client/messages': typeof ClientMessagesRoute
@@ -175,10 +193,12 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/admin'
     | '/client'
     | '/login'
     | '/register'
     | '/worker'
+    | '/admin/dashboard'
     | '/client/bookings'
     | '/client/dashboard'
     | '/client/messages'
@@ -194,10 +214,12 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/admin'
     | '/client'
     | '/login'
     | '/register'
     | '/worker'
+    | '/admin/dashboard'
     | '/client/bookings'
     | '/client/dashboard'
     | '/client/messages'
@@ -213,10 +235,12 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/admin'
     | '/client'
     | '/login'
     | '/register'
     | '/worker'
+    | '/admin/dashboard'
     | '/client/bookings'
     | '/client/dashboard'
     | '/client/messages'
@@ -233,6 +257,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AdminRoute: typeof AdminRouteWithChildren
   ClientRoute: typeof ClientRouteWithChildren
   LoginRoute: typeof LoginRoute
   RegisterRoute: typeof RegisterRoute
@@ -267,6 +292,13 @@ declare module '@tanstack/react-router' {
       path: '/client'
       fullPath: '/client'
       preLoaderRoute: typeof ClientRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -332,6 +364,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ClientBookingsRouteImport
       parentRoute: typeof ClientRoute
     }
+    '/admin/dashboard': {
+      id: '/admin/dashboard'
+      path: '/dashboard'
+      fullPath: '/admin/dashboard'
+      preLoaderRoute: typeof AdminDashboardRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/worker/chat/$clientId': {
       id: '/worker/chat/$clientId'
       path: '/chat/$clientId'
@@ -362,6 +401,16 @@ declare module '@tanstack/react-router' {
     }
   }
 }
+
+interface AdminRouteChildren {
+  AdminDashboardRoute: typeof AdminDashboardRoute
+}
+
+const AdminRouteChildren: AdminRouteChildren = {
+  AdminDashboardRoute: AdminDashboardRoute,
+}
+
+const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
 interface ClientRouteChildren {
   ClientBookingsRoute: typeof ClientBookingsRoute
@@ -407,6 +456,7 @@ const WorkerRouteWithChildren =
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AdminRoute: AdminRouteWithChildren,
   ClientRoute: ClientRouteWithChildren,
   LoginRoute: LoginRoute,
   RegisterRoute: RegisterRoute,

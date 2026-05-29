@@ -27,6 +27,13 @@ const defaultUsers: Record<UserRole, AuthUser> = {
     location: "Visayan Village, Tagum City",
     workerId: "w1",
   },
+  admin: {
+    id: "admin-demo",
+    name: "Admin Demo",
+    email: "admin@viapathhub.demo",
+    role: "admin",
+    location: "Tagum City Operations",
+  },
 };
 
 const STORAGE_KEY = "viapathhub_user";
@@ -67,6 +74,7 @@ export const authStore = {
     return currentUser?.role === role;
   },
   getHomePath(role = currentUser?.role) {
+    if (role === "admin") return "/admin/dashboard";
     return role === "worker" ? "/worker/dashboard" : "/client/dashboard";
   },
   login(input: AuthInput) {

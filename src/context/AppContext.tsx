@@ -42,6 +42,7 @@ interface AppContextValue {
   createBooking: (input: CreateBookingInput) => Booking | null;
   updateBookingStatus: (bookingId: string, status: BookingStatus) => boolean;
   updateWorkerProfile: (input: UpdateWorkerProfileInput) => void;
+  verifyWorker: (workerId: string) => void;
   getWorkerById: (workerId: string) => WorkerProfile | undefined;
   getBookingsByStatus: (status: BookingStatus) => Booking[];
 }
@@ -164,7 +165,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
           about: "Newly onboarded worker profile ready to accept flexible jobs in Tagum City.",
           image: initialWorkers[0]?.image ?? "",
           skills: ["Home service", "Flexible schedule", "Quick replies"],
-          verified: true,
+          verified: false,
+          isIdVerified: false,
+          hasPoliceClearance: false,
+          hasBarangayClearance: false,
+          certifications: ["Pending admin qualification review"],
+          barangay: "Magugpo",
           completedJobs: 0,
           responseTime: "Replies in 20 mins",
           lat: 7.4478,
@@ -261,6 +267,25 @@ export function AppProvider({ children }: { children: ReactNode }) {
     );
   };
 
+  const verifyWorker = (workerId: string) => {
+    setWorkers((current) =>
+      current.map((worker) =>
+        worker.id === workerId
+          ? {
+              ...worker,
+              verified: true,
+              isIdVerified: true,
+              hasPoliceClearance: true,
+              hasBarangayClearance: true,
+              certifications: worker.certifications.includes("Admin verified")
+                ? worker.certifications
+                : [...worker.certifications.filter((certification) => certification !== "Pending admin qualification review"), "Admin verified"],
+            }
+          : worker,
+      ),
+    );
+  };
+
   const value = useMemo<AppContextValue>(
     () => ({
       user,
@@ -277,6 +302,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       createBooking,
       updateBookingStatus,
       updateWorkerProfile,
+      verifyWorker,
       getWorkerById: (workerId: string) => workers.find((worker) => worker.id === workerId),
       getBookingsByStatus: (status: BookingStatus) => bookings.filter((booking) => booking.status === status),
     }),

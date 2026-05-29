@@ -16,9 +16,17 @@ export function RegisterPage() {
   const [role, setRole] = useState<UserRole>("client");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [location, setLocation] = useState("Tagum City, Davao del Norte");
 
+  const passwordError =
+    password && confirmPassword && password !== confirmPassword ? "Passwords do not match." : "";
+  const canSubmit = Boolean(name && email && location && password && confirmPassword && !passwordError);
+
   const submit = () => {
+    if (!canSubmit) return;
+
     const user = register({ name, email, role, location });
     navigate({ to: user.role === "client" ? "/client/dashboard" : "/worker/dashboard" });
   };
@@ -65,11 +73,28 @@ export function RegisterPage() {
           <Label htmlFor="email">Email</Label>
           <Input id="email" type="email" placeholder="you@example.com" value={email} onChange={(event) => setEmail(event.target.value)} />
         </div>
+        <div className="grid gap-4 sm:grid-cols-2">
+          <div className="space-y-2">
+            <Label htmlFor="password">Password</Label>
+            <Input id="password" type="password" placeholder="Create password" value={password} onChange={(event) => setPassword(event.target.value)} />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="confirm-password">Confirm password</Label>
+            <Input
+              id="confirm-password"
+              type="password"
+              placeholder="Repeat password"
+              value={confirmPassword}
+              onChange={(event) => setConfirmPassword(event.target.value)}
+            />
+          </div>
+        </div>
+        {passwordError ? <p className="text-sm font-medium text-destructive">{passwordError}</p> : null}
         <div className="space-y-2">
           <Label htmlFor="location">Location</Label>
           <Input id="location" placeholder="Tagum City, Davao del Norte" value={location} onChange={(event) => setLocation(event.target.value)} />
         </div>
-        <Button size="lg" className="w-full" onClick={submit} disabled={!name || !email || !location}>
+        <Button size="lg" className="w-full" onClick={submit} disabled={!canSubmit}>
           Create {role} account
         </Button>
       </section>

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -42,9 +42,14 @@ export function LoginPage() {
       </section>
 
       <section className="form-panel space-y-5">
-        <div className="space-y-1">
-          <h2 className="text-2xl font-bold text-foreground">Login</h2>
-          <p className="text-sm text-muted-foreground">No password validation yet — this is a front-end MVP flow.</p>
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+          <div className="space-y-1">
+            <h2 className="text-2xl font-bold text-foreground">Login</h2>
+            <p className="text-sm text-muted-foreground">No password validation yet — this is a front-end MVP flow.</p>
+          </div>
+          <Button asChild variant="outline" size="sm">
+            <Link to="/register">Register</Link>
+          </Button>
         </div>
 
         <div className="space-y-2">

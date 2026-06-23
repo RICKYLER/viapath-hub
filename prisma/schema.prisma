@@ -1,0 +1,93 @@
+datasource db {
+  provider = "postgresql"
+}
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../workers/api-worker/node_modules/.prisma/client"
+}
+
+model User {
+  id         String   @id @default(uuid())
+  email      String   @unique
+  role       String   @default("client") // "client" | "worker" | "admin"
+  fullName   String   @map("full_name")
+  avatarUrl  String?  @map("avatar_url")
+  location   String?
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  worker           Worker?
+  clientJobs       Job[]     @relation("ClientJobs")
+  reviews          Review[]  @relation("Reviewer")
+  sentMessages     Message[] @relation("SentMessages")
+  receivedMessages Message[] @relation("ReceivedMessages")
+
+  @@map("users")
+}
+
+model Worker {
+  id              String   @id // references User.id
+  user            User     @relation(fields: [id], references: [id], onDelete: Cascade)
+  title           String
+  category        String
+  rating          Float    @default(0.0)
+  reviewCount     Int      @default(0) @map("review_count")
+  hourlyRate      Float    @map("hourly_rate")
+  bio             String
+  locationLat     Float?   @map("location_lat")
+  locationLng     Float?   @map("location_lng")
+  locationGeohash String?  @map("location_geohash")
+
+  workerJobs      Job[]    @relation("WorkerJobs")
+  reviews         Review[]
+
+  @@map("workers")
+}
+
+model Job {
+  id           String   @id @default(uuid())
+  clientId     String   @map("client_id")
+  workerId     String   @map("worker_id")
+  client       User     @relation("ClientJobs", fields: [clientId], references: [id])
+  worker       Worker   @relation("WorkerJobs", fields: [workerId], references: [id])
+  status       String   @default("pending") // "pending" | "accepted" | "in_progress" | "completed" | "cancelled"
+  description  String
+  scheduledFor DateTime @map("scheduled_for")
+  price        Float
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  reviews      Review[]
+  messages     Message[]
+
+  @@map("jobs")
+}
+
+model Review {
+  id         String   @id @default(uuid())
+  jobId      String   @map("job_id")
+  reviewerId String   @map("reviewer_id")
+  workerId   String   @map("worker_id")
+  job        Job      @relation(fields: [jobId], references: [id])
+  reviewer   User     @relation("Reviewer", fields: [reviewerId], references: [id])
+  worker     Worker   @relation(fields: [workerId], references: [id])
+  rating     Int      // 1-5
+  comment    String?
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  @@map("reviews")
+}
+
+model Message {
+  id         String   @id @default(uuid())
+  jobId      String?  @map("job_id")
+  senderId   String   @map("sender_id")
+  receiverId String   @map("receiver_id")
+  job        Job?     @relation(fields: [jobId], references: [id])
+  sender     User     @relation("SentMessages", fields: [senderId], references: [id])
+  receiver   User     @relation("ReceivedMessages", fields: [receiverId], references: [id])
+  content    String
+  read       Boolean  @default(false)
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  @@map("messages")
+}

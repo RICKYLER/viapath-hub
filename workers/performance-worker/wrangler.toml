@@ -1,0 +1,7 @@
+name = "viapath-performance-worker"
+main = "build/worker/index.js"
+compatibility_date = "2024-02-22"
+
+[build]
+command = "wasm-pack build --target web --out-dir build/worker"
+watch_dir = "src"

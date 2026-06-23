@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
+import { Link } from '@tanstack/react-router';
 
 // Fix for default marker icons in Leaflet with Webpack/Vite
 // @ts-ignore
@@ -105,16 +106,25 @@ export const MapLocator: React.FC<MapLocatorProps> = ({ onLocationSelect, worker
         {workers.map((worker) => (
           <Marker key={worker.id} position={[worker.lat, worker.lng]}>
             <Popup>
-              <div className="space-y-1">
-                <p className="font-bold">{worker.name}</p>
-                <a 
-                  href={`https://www.google.com/maps/search/?api=1&query=${worker.lat},${worker.lng}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-[10px] text-primary hover:underline flex items-center gap-1"
-                >
-                  View on Google Maps
-                </a>
+              <div className="p-1 space-y-2 text-center min-w-[120px]">
+                <p className="font-bold text-sm text-foreground m-0">{worker.name}</p>
+                <div className="flex flex-col gap-1.5">
+                  <Link
+                    to="/client/booking/$workerId"
+                    params={{ workerId: worker.id }}
+                    className="inline-flex justify-center items-center rounded-full bg-primary px-3 py-1 text-[11px] font-bold text-primary-foreground hover:brightness-105 transition-all text-center no-underline cursor-pointer"
+                  >
+                    Book Now
+                  </Link>
+                  <a 
+                    href={`https://www.google.com/maps/search/?api=1&query=${worker.lat},${worker.lng}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-[10px] text-muted-foreground hover:text-foreground hover:underline transition-colors mt-0.5 no-underline"
+                  >
+                    View on Google Maps
+                  </a>
+                </div>
               </div>
             </Popup>
           </Marker>

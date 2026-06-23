@@ -9,6 +9,12 @@ export interface AuthUser {
   workerId?: string;
 }
 
+export interface DocumentReview {
+  type: "id" | "police" | "barangay";
+  status: "pending" | "approved" | "rejected";
+  rejectionNote?: string;
+}
+
 export interface WorkerProfile {
   id: string;
   name: string;
@@ -28,6 +34,9 @@ export interface WorkerProfile {
   responseTime: string;
   lat: number;
   lng: number;
+  acceptingBookings?: boolean;
+  suspended?: boolean;
+  documentReviews?: DocumentReview[];
 }
 
 export type BookingStatus = "pending" | "accepted" | "completed" | "cancelled";
@@ -63,4 +72,32 @@ export interface Transaction {
   status: "completed" | "pending" | "refunded";
   type: "payment" | "payout";
   counterpartName: string;
+}
+
+export type DisputeResolution = "refund" | "warn" | "dismiss";
+export type DisputeStatus = "open" | "resolved" | "dismissed";
+
+export interface Dispute {
+  id: string;
+  bookingId: string;
+  clientId: string;
+  clientName: string;
+  workerName: string;
+  service: string;
+  complaint: string;
+  workerResponse?: string;
+  status: DisputeStatus;
+  resolution?: DisputeResolution;
+  createdAt: string;
+}
+
+export type AnnouncementTarget = "all" | "clients" | "workers";
+
+export interface Announcement {
+  id: string;
+  title: string;
+  message: string;
+  target: AnnouncementTarget;
+  expiresAt?: string;
+  createdAt: string;
 }

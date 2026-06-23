@@ -99,6 +99,7 @@ export const authStore = {
       role: input.role,
       location: input.location.trim(),
       workerId: input.role === "worker" ? `worker-${Date.now()}` : undefined,
+
     };
     localStorage.setItem(STORAGE_KEY, JSON.stringify(currentUser));
     emit();

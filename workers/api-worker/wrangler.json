@@ -1,0 +1,12 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "viapath-api-worker",
+  "main": "src/index.ts",
+  "compatibility_date": "2024-02-22",
+  "compatibility_flags": [
+    "nodejs_compat"
+  ],
+  "vars": {
+    "DATABASE_URL": "postgres://fdcf6f3231c43f85bec23a9732f590fc5a7b8e3822ebba52f91162779acc3be9:sk_HzpKfGdh8EXl5bECOqiJZ@pooled.db.prisma.io:5432/postgres?sslmode=require"
+  }
+}

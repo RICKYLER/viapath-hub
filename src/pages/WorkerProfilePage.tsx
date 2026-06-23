@@ -1,14 +1,22 @@
+import { useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { BriefcaseBusiness, MapPin, MessageSquare, ShieldCheck, Star } from "lucide-react";
+import { BriefcaseBusiness, MapPin, MessageSquare, ShieldCheck, Star, UploadCloud, CheckCircle2 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
 import { RatingStars } from "@/components/RatingStars";
 import { ReviewList } from "@/components/ReviewList";
 import { useAppContext } from "@/context/AppContext";
+import { toast } from "sonner";
 
 export function WorkerProfilePage({ workerId }: { workerId: string }) {
-  const { getWorkerById, user } = useAppContext();
+  const { getWorkerById, user, updateWorkerProfile } = useAppContext();
   const worker = getWorkerById(workerId);
+
+  const [idFile, setIdFile] = useState<string | null>(null);
+  const [policeFile, setPoliceFile] = useState<string | null>(null);
+  const [barangayFile, setBarangayFile] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
 
   if (!worker) {
     return (
@@ -17,6 +25,28 @@ export function WorkerProfilePage({ workerId }: { workerId: string }) {
       </div>
     );
   }
+
+  const handleVettingSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!idFile && !policeFile && !barangayFile) {
+      toast.error("Please upload at least one vetting document.");
+      return;
+    }
+    setSubmitting(true);
+    setTimeout(() => {
+      updateWorkerProfile({
+        isIdVerified: idFile ? true : worker.isIdVerified,
+        hasPoliceClearance: policeFile ? true : worker.hasPoliceClearance,
+        hasBarangayClearance: barangayFile ? true : worker.hasBarangayClearance,
+        verified: true,
+      });
+      toast.success("Vetting documents submitted and approved successfully!");
+      setSubmitting(false);
+      setIdFile(null);
+      setPoliceFile(null);
+      setBarangayFile(null);
+    }, 1500);
+  };
 
   return (
     <div className="page-shell section-gap grid gap-6 lg:grid-cols-[320px_minmax(0,1fr)]">
@@ -58,11 +88,21 @@ export function WorkerProfilePage({ workerId }: { workerId: string }) {
         <div className="flex flex-col gap-3">
           {user?.id !== worker.id && (
             <>
-              <Button asChild className="w-full" size="lg">
-                <Link to="/client/booking/$workerId" params={{ workerId: worker.id }}>
-                  Book this worker
-                </Link>
-              </Button>
+              {worker.suspended ? (
+                <Button disabled className="w-full bg-muted text-muted-foreground cursor-not-allowed border-transparent" size="lg">
+                  Worker Suspended
+                </Button>
+              ) : worker.acceptingBookings !== false ? (
+                <Button asChild className="w-full" size="lg">
+                  <Link to="/client/booking/$workerId" params={{ workerId: worker.id }}>
+                    Book this worker
+                  </Link>
+                </Button>
+              ) : (
+                <Button disabled className="w-full bg-muted text-muted-foreground cursor-not-allowed border-transparent" size="lg">
+                  Offline / On Break
+                </Button>
+              )}
               <Button asChild variant="outline" className="w-full" size="lg">
                 <Link to="/client/chat/$workerId" params={{ workerId: worker.id }}>
                   <MessageSquare size={18} className="mr-2" />
@@ -82,6 +122,91 @@ export function WorkerProfilePage({ workerId }: { workerId: string }) {
       </aside>
 
       <section className="space-y-5">
+        {worker.suspended && (
+          <div className="surface-panel p-4 bg-destructive/8 border-destructive/25 rounded-[1.5rem] flex items-center gap-3">
+            <div className="h-2.5 w-2.5 rounded-full bg-destructive shrink-0" />
+            <p className="text-sm text-destructive font-semibold">
+              This worker has been suspended by the platform administrator and is not currently available for bookings.
+            </p>
+          </div>
+        )}
+        {!worker.suspended && worker.acceptingBookings === false && (
+          <div className="surface-panel p-4 bg-destructive/5 border-destructive/20 rounded-[1.5rem] flex items-center gap-3">
+            <div className="h-2.5 w-2.5 rounded-full bg-destructive animate-ping" />
+            <p className="text-sm text-destructive font-semibold">
+              This professional is currently taking a break and not accepting bookings.
+            </p>
+          </div>
+        )}
+
+        {/* Own Profile Clearance Vetting Upload Center */}
+        {user?.id === worker.id && (
+          <article className="surface-panel p-6 space-y-6">
+            <div>
+              <h2 className="text-xl font-bold text-foreground">Identity & Clearance Vetting</h2>
+              <p className="text-xs text-muted-foreground mt-1">Submit files to verify credentials and earn trust badges.</p>
+            </div>
+            
+            <form onSubmit={handleVettingSubmit} className="space-y-4">
+              <div className="grid gap-4 sm:grid-cols-3">
+                {/* ID upload block */}
+                <div className="space-y-2">
+                  <Label className="text-xs font-semibold text-foreground/80">Gov ID Document</Label>
+                  {worker.isIdVerified ? (
+                    <div className="flex items-center gap-1.5 p-4 rounded-xl bg-success/5 border border-success/20 text-success text-xs font-bold justify-center h-20">
+                      <CheckCircle2 size={16} /> Verified
+                    </div>
+                  ) : (
+                    <label className={`flex flex-col items-center justify-center border-2 border-dashed rounded-xl p-3 h-20 cursor-pointer transition-colors ${idFile ? "border-primary bg-primary/5 text-primary" : "border-border/60 bg-surface/50 hover:bg-surface text-muted-foreground"}`}>
+                      <UploadCloud size={18} />
+                      <span className="text-[10px] mt-1 font-bold">{idFile ? "Selected" : "Upload ID"}</span>
+                      <input type="file" className="hidden" accept="image/*,application/pdf" onChange={(e) => setIdFile(e.target.files?.[0]?.name ?? "id_verified.pdf")} />
+                    </label>
+                  )}
+                </div>
+
+                {/* Police Clearance upload block */}
+                <div className="space-y-2">
+                  <Label className="text-xs font-semibold text-foreground/80">Police Clearance</Label>
+                  {worker.hasPoliceClearance ? (
+                    <div className="flex items-center gap-1.5 p-4 rounded-xl bg-success/5 border border-success/20 text-success text-xs font-bold justify-center h-20">
+                      <CheckCircle2 size={16} /> Cleared
+                    </div>
+                  ) : (
+                    <label className={`flex flex-col items-center justify-center border-2 border-dashed rounded-xl p-3 h-20 cursor-pointer transition-colors ${policeFile ? "border-primary bg-primary/5 text-primary" : "border-border/60 bg-surface/50 hover:bg-surface text-muted-foreground"}`}>
+                      <UploadCloud size={18} />
+                      <span className="text-[10px] mt-1 font-bold">{policeFile ? "Selected" : "Upload Certificate"}</span>
+                      <input type="file" className="hidden" accept="image/*,application/pdf" onChange={(e) => setPoliceFile(e.target.files?.[0]?.name ?? "police_clearance.pdf")} />
+                    </label>
+                  )}
+                </div>
+
+                {/* Barangay Clearance upload block */}
+                <div className="space-y-2">
+                  <Label className="text-xs font-semibold text-foreground/80">Barangay Clearance</Label>
+                  {worker.hasBarangayClearance ? (
+                    <div className="flex items-center gap-1.5 p-4 rounded-xl bg-success/5 border border-success/20 text-success text-xs font-bold justify-center h-20">
+                      <CheckCircle2 size={16} /> Cleared
+                    </div>
+                  ) : (
+                    <label className={`flex flex-col items-center justify-center border-2 border-dashed rounded-xl p-3 h-20 cursor-pointer transition-colors ${barangayFile ? "border-primary bg-primary/5 text-primary" : "border-border/60 bg-surface/50 hover:bg-surface text-muted-foreground"}`}>
+                      <UploadCloud size={18} />
+                      <span className="text-[10px] mt-1 font-bold">{barangayFile ? "Selected" : "Upload Clearance"}</span>
+                      <input type="file" className="hidden" accept="image/*,application/pdf" onChange={(e) => setBarangayFile(e.target.files?.[0]?.name ?? "barangay_clearance.pdf")} />
+                    </label>
+                  )}
+                </div>
+              </div>
+
+              {(!worker.isIdVerified || !worker.hasPoliceClearance || !worker.hasBarangayClearance) && (
+                <Button type="submit" disabled={submitting} className="w-full cursor-pointer h-10 rounded-full font-bold text-xs" size="sm">
+                  {submitting ? "Submitting..." : "Submit Vetting Documents"}
+                </Button>
+              )}
+            </form>
+          </article>
+        )}
+
         <article className="surface-panel p-6">
           <h2 className="text-xl font-bold text-foreground">About</h2>
           <p className="mt-3 body-copy">{worker.about}</p>

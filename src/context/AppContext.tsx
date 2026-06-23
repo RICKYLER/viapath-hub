@@ -10,7 +10,18 @@ import {
 
 import { workers as initialWorkers, serviceTypes } from "@/data/workers";
 import { authStore } from "@/context/auth-store";
-import type { AuthUser, Booking, BookingStatus, Transaction, WorkerProfile } from "@/context/types";
+import type {
+  Announcement,
+  AnnouncementTarget,
+  AuthUser,
+  Booking,
+  BookingStatus,
+  Dispute,
+  DisputeResolution,
+  DocumentReview,
+  Transaction,
+  WorkerProfile,
+} from "@/context/types";
 import { fetchWorkers, createBookingDb } from "@/lib/api";
 
 interface CreateBookingInput {
@@ -21,10 +32,17 @@ interface CreateBookingInput {
 }
 
 interface UpdateWorkerProfileInput {
-  about: string;
-  location: string;
-  service: string;
-  skills: string[];
+  about?: string;
+  location?: string;
+  service?: string;
+  skills?: string[];
+  acceptingBookings?: boolean;
+  suspended?: boolean;
+  verified?: boolean;
+  isIdVerified?: boolean;
+  hasPoliceClearance?: boolean;
+  hasBarangayClearance?: boolean;
+  documentReviews?: DocumentReview[];
 }
 
 interface AppContextValue {
@@ -36,6 +54,9 @@ interface AppContextValue {
   workerBookings: Booking[];
   topWorkers: WorkerProfile[];
   transactions: Transaction[];
+  disputes: Dispute[];
+  announcements: Announcement[];
+  dismissedAnnouncementIds: string[];
   login: typeof authStore.login;
   register: typeof authStore.register;
   logout: typeof authStore.logout;
@@ -43,8 +64,17 @@ interface AppContextValue {
   updateBookingStatus: (bookingId: string, status: BookingStatus) => boolean;
   updateWorkerProfile: (input: UpdateWorkerProfileInput) => void;
   verifyWorker: (workerId: string) => void;
+  suspendWorker: (workerId: string) => void;
+  unsuspendWorker: (workerId: string) => void;
+  approveDocument: (workerId: string, docType: DocumentReview["type"]) => void;
+  rejectDocument: (workerId: string, docType: DocumentReview["type"], note: string) => void;
+  fileDispute: (bookingId: string, complaint: string) => void;
+  resolveDispute: (disputeId: string, resolution: DisputeResolution) => void;
+  postAnnouncement: (input: Omit<Announcement, "id" | "createdAt">) => void;
+  dismissAnnouncement: (announcementId: string) => void;
   getWorkerById: (workerId: string) => WorkerProfile | undefined;
   getBookingsByStatus: (status: BookingStatus) => Booking[];
+  getActiveAnnouncements: (role: "clients" | "workers") => Announcement[];
 }
 
 const createStatusHistoryItem = (status: BookingStatus, changedAt: string) => ({ status, changedAt });
@@ -67,8 +97,8 @@ const seededBookings: Booking[] = [
     note: "Need a relaxing home session after office hours.",
     status: "accepted",
     price: 500,
-    lat: 7.4380,
-    lng: 125.8220,
+    lat: 7.438,
+    lng: 125.822,
     statusHistory: [
       createStatusHistoryItem("pending", "2026-04-22T09:15:00.000Z"),
       createStatusHistoryItem("accepted", "2026-04-22T10:00:00.000Z"),
@@ -86,8 +116,8 @@ const seededBookings: Booking[] = [
     note: "Kitchen sink leak needs checking before noon.",
     status: "pending",
     price: 350,
-    lat: 7.4650,
-    lng: 125.7950,
+    lat: 7.465,
+    lng: 125.795,
     statusHistory: [createStatusHistoryItem("pending", "2026-04-22T11:30:00.000Z")],
   },
   {
@@ -100,11 +130,15 @@ const seededBookings: Booking[] = [
     date: "2026-04-26T18:30",
     location: "Magugpo South, Tagum City",
     note: "Deep tissue massage after a basketball game.",
-    status: "pending",
+    status: "completed",
     price: 500,
     lat: 7.4478,
     lng: 125.8094,
-    statusHistory: [createStatusHistoryItem("pending", "2026-04-22T12:10:00.000Z")],
+    statusHistory: [
+      createStatusHistoryItem("pending", "2026-04-22T12:10:00.000Z"),
+      createStatusHistoryItem("accepted", "2026-04-23T08:00:00.000Z"),
+      createStatusHistoryItem("completed", "2026-04-26T20:00:00.000Z"),
+    ],
   },
 ];
 
@@ -120,12 +154,39 @@ const seededTransactions: Transaction[] = [
   },
   {
     id: "t2",
-    bookingId: "b0", // Historical
+    bookingId: "b0",
     amount: 450,
     date: "2026-04-20T16:20:00.000Z",
     status: "completed",
     type: "payment",
     counterpartName: "Marco Silva",
+  },
+];
+
+const seededDisputes: Dispute[] = [
+  {
+    id: "d1",
+    bookingId: "b3",
+    clientId: "client-lyra",
+    clientName: "Lyra Santos",
+    workerName: "Lina Mae Torres",
+    service: "Massage Therapy",
+    complaint:
+      "The worker arrived 45 minutes late without prior notice. The session was rushed as a result. I would like a partial refund.",
+    status: "open",
+    createdAt: "2026-04-27T09:00:00.000Z",
+  },
+];
+
+const seededAnnouncements: Announcement[] = [
+  {
+    id: "ann1",
+    title: "Platform Maintenance — June 30",
+    message:
+      "ViaPathHub will be offline for scheduled maintenance on June 30 from 2:00 AM to 4:00 AM (PHT). New bookings cannot be made during this window.",
+    target: "all",
+    expiresAt: "2026-06-30T04:00:00.000Z",
+    createdAt: "2026-06-23T00:00:00.000Z",
   },
 ];
 
@@ -136,6 +197,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [workers, setWorkers] = useState<WorkerProfile[]>(initialWorkers);
   const [bookings, setBookings] = useState<Booking[]>(seededBookings);
   const [transactions, setTransactions] = useState<Transaction[]>(seededTransactions);
+  const [disputes, setDisputes] = useState<Dispute[]>(seededDisputes);
+  const [announcements, setAnnouncements] = useState<Announcement[]>(seededAnnouncements);
+  const [dismissedAnnouncementIds, setDismissedAnnouncementIds] = useState<string[]>([]);
 
   useEffect(() => {
     async function loadData() {
@@ -249,19 +313,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
     return didUpdate;
   };
 
-  const updateWorkerProfile = ({ about, location, service, skills }: UpdateWorkerProfileInput) => {
+  const updateWorkerProfile = (input: UpdateWorkerProfileInput) => {
     if (!user?.workerId) return;
 
     setWorkers((current) =>
       current.map((worker) =>
         worker.id === user.workerId
-          ? {
-              ...worker,
-              about,
-              location,
-              service,
-              skills,
-            }
+          ? { ...worker, ...input }
           : worker,
       ),
     );
@@ -279,11 +337,118 @@ export function AppProvider({ children }: { children: ReactNode }) {
               hasBarangayClearance: true,
               certifications: worker.certifications.includes("Admin verified")
                 ? worker.certifications
-                : [...worker.certifications.filter((certification) => certification !== "Pending admin qualification review"), "Admin verified"],
+                : [
+                    ...worker.certifications.filter(
+                      (certification) => certification !== "Pending admin qualification review",
+                    ),
+                    "Admin verified",
+                  ],
             }
           : worker,
       ),
     );
+  };
+
+  const suspendWorker = (workerId: string) => {
+    setWorkers((current) =>
+      current.map((w) => (w.id === workerId ? { ...w, suspended: true } : w)),
+    );
+  };
+
+  const unsuspendWorker = (workerId: string) => {
+    setWorkers((current) =>
+      current.map((w) => (w.id === workerId ? { ...w, suspended: false } : w)),
+    );
+  };
+
+  const approveDocument = (workerId: string, docType: DocumentReview["type"]) => {
+    setWorkers((current) =>
+      current.map((w) => {
+        if (w.id !== workerId) return w;
+        const existingReviews = w.documentReviews ?? [];
+        const updated = existingReviews.filter((r) => r.type !== docType);
+        updated.push({ type: docType, status: "approved" });
+        const isIdVerified = docType === "id" ? true : w.isIdVerified;
+        const hasPoliceClearance = docType === "police" ? true : w.hasPoliceClearance;
+        const hasBarangayClearance = docType === "barangay" ? true : w.hasBarangayClearance;
+        const allApproved = isIdVerified && hasPoliceClearance && hasBarangayClearance;
+        return {
+          ...w,
+          documentReviews: updated,
+          isIdVerified,
+          hasPoliceClearance,
+          hasBarangayClearance,
+          verified: allApproved ? true : w.verified,
+        };
+      }),
+    );
+  };
+
+  const rejectDocument = (workerId: string, docType: DocumentReview["type"], note: string) => {
+    setWorkers((current) =>
+      current.map((w) => {
+        if (w.id !== workerId) return w;
+        const existingReviews = w.documentReviews ?? [];
+        const updated = existingReviews.filter((r) => r.type !== docType);
+        updated.push({ type: docType, status: "rejected", rejectionNote: note });
+        return { ...w, documentReviews: updated };
+      }),
+    );
+  };
+
+  const fileDispute = (bookingId: string, complaint: string) => {
+    if (!user) return;
+    const booking = bookings.find((b) => b.id === bookingId);
+    if (!booking) return;
+    const dispute: Dispute = {
+      id: `dispute-${Date.now()}`,
+      bookingId,
+      clientId: user.id,
+      clientName: user.name,
+      workerName: booking.workerName,
+      service: booking.service,
+      complaint,
+      status: "open",
+      createdAt: new Date().toISOString(),
+    };
+    setDisputes((current) => [dispute, ...current]);
+  };
+
+  const resolveDispute = (disputeId: string, resolution: DisputeResolution) => {
+    setDisputes((current) =>
+      current.map((d) =>
+        d.id === disputeId
+          ? { ...d, status: resolution === "dismiss" ? "dismissed" : "resolved", resolution }
+          : d,
+      ),
+    );
+  };
+
+  const postAnnouncement = (input: Omit<Announcement, "id" | "createdAt">) => {
+    const ann: Announcement = {
+      ...input,
+      id: `ann-${Date.now()}`,
+      createdAt: new Date().toISOString(),
+    };
+    setAnnouncements((current) => [ann, ...current]);
+  };
+
+  const dismissAnnouncement = (announcementId: string) => {
+    setDismissedAnnouncementIds((current) =>
+      current.includes(announcementId) ? current : [...current, announcementId],
+    );
+  };
+
+  const getActiveAnnouncements = (role: "clients" | "workers") => {
+    const now = new Date();
+    return announcements.filter((ann) => {
+      if (dismissedAnnouncementIds.includes(ann.id)) return false;
+      if (ann.expiresAt && new Date(ann.expiresAt) < now) return false;
+      if (ann.target === "all") return true;
+      if (ann.target === "clients" && role === "clients") return true;
+      if (ann.target === "workers" && role === "workers") return true;
+      return false;
+    });
   };
 
   const value = useMemo<AppContextValue>(
@@ -296,6 +461,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
       workerBookings,
       topWorkers,
       transactions,
+      disputes,
+      announcements,
+      dismissedAnnouncementIds,
       login: authStore.login,
       register: authStore.register,
       logout: authStore.logout,
@@ -303,10 +471,20 @@ export function AppProvider({ children }: { children: ReactNode }) {
       updateBookingStatus,
       updateWorkerProfile,
       verifyWorker,
+      suspendWorker,
+      unsuspendWorker,
+      approveDocument,
+      rejectDocument,
+      fileDispute,
+      resolveDispute,
+      postAnnouncement,
+      dismissAnnouncement,
       getWorkerById: (workerId: string) => workers.find((worker) => worker.id === workerId),
       getBookingsByStatus: (status: BookingStatus) => bookings.filter((booking) => booking.status === status),
+      getActiveAnnouncements,
     }),
-    [bookings, clientBookings, topWorkers, transactions, user, workerBookings, workers],
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [bookings, clientBookings, topWorkers, transactions, disputes, announcements, dismissedAnnouncementIds, user, workerBookings, workers],
   );
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

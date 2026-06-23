@@ -4,6 +4,7 @@ import { CheckCircle2, Clock3, MapPin } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { RatingStars } from "@/components/RatingStars";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import type { WorkerProfile } from "@/context/types";
 
 interface WorkerCardProps {
@@ -25,10 +26,84 @@ export function WorkerCard({ worker, canBook = false }: WorkerCardProps) {
           <div className="min-w-0 flex-1 space-y-2">
             <div className="flex items-start justify-between gap-3">
               <div>
-                <h3 className="text-lg font-bold text-foreground">{worker.name}</h3>
-                <p className="text-sm font-medium text-primary">{worker.service}</p>
+                <div className="flex flex-wrap items-center gap-2">
+                  <h3 className="text-lg font-bold text-foreground leading-tight">{worker.name}</h3>
+                  {worker.suspended && (
+                    <span className="inline-flex h-4 px-1.5 items-center justify-center rounded bg-muted text-muted-foreground text-[8px] font-extrabold uppercase">
+                      Suspended
+                    </span>
+                  )}
+                  {!worker.suspended && worker.acceptingBookings === false && (
+                    <span className="inline-flex h-4 px-1.5 items-center justify-center rounded bg-destructive/10 text-destructive text-[8px] font-extrabold uppercase">
+                      Offline
+                    </span>
+                  )}
+                </div>
+                <div className="flex flex-wrap items-center gap-2 mt-1.5">
+                  <p className="text-sm font-medium text-primary leading-none">{worker.service}</p>
+                  
+                  {/* Trust Badges */}
+                  <TooltipProvider>
+                    <div className="flex items-center gap-1.5">
+                      {worker.isIdVerified && (
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <span className="inline-flex h-4 px-1.5 items-center justify-center rounded bg-success/12 border border-success/20 text-success text-[8px] font-extrabold uppercase cursor-help select-none">
+                              ID
+                            </span>
+                          </TooltipTrigger>
+                          <TooltipContent className="bg-foreground text-background border border-border max-w-[220px]">
+                            <p className="font-bold text-xs">ID Verified</p>
+                            <p className="text-[10px] text-muted-foreground mt-0.5">Government identification checked and validated by admin.</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      )}
+                      {worker.hasPoliceClearance && (
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <span className="inline-flex h-4 px-1.5 items-center justify-center rounded bg-info/12 border border-info/25 text-info text-[8px] font-extrabold uppercase cursor-help select-none">
+                              Police
+                            </span>
+                          </TooltipTrigger>
+                          <TooltipContent className="bg-foreground text-background border border-border max-w-[220px]">
+                            <p className="font-bold text-xs">Police Cleared</p>
+                            <p className="text-[10px] text-muted-foreground mt-0.5">Official Police Clearance verified with zero criminal record history.</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      )}
+                      {worker.hasBarangayClearance && (
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <span className="inline-flex h-4 px-1.5 items-center justify-center rounded bg-secondary text-secondary-foreground border border-border/10 text-[8px] font-extrabold uppercase cursor-help select-none">
+                              Barangay
+                            </span>
+                          </TooltipTrigger>
+                          <TooltipContent className="bg-foreground text-background border border-border max-w-[220px]">
+                            <p className="font-bold text-xs">Barangay Cleared</p>
+                            <p className="text-[10px] text-muted-foreground mt-0.5">Verified active residency clearance within the local Barangay.</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      )}
+                    </div>
+                  </TooltipProvider>
+                </div>
               </div>
-              {worker.verified ? <CheckCircle2 className="text-success" size={18} /> : null}
+              
+              {worker.verified ? (
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button type="button" className="cursor-help text-success hover:scale-105 transition-transform">
+                        <CheckCircle2 size={18} />
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent className="bg-foreground text-background border border-border">
+                      <p className="font-bold text-xs">Verified Specialist</p>
+                      <p className="text-[10px] text-muted-foreground mt-0.5">This worker has completed all trust checks.</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              ) : null}
             </div>
             <RatingStars rating={worker.rating} />
           </div>
@@ -62,11 +137,21 @@ export function WorkerCard({ worker, canBook = false }: WorkerCardProps) {
             </Link>
           </Button>
           {canBook ? (
-            <Button asChild className="flex-1 sm:flex-none">
-              <Link to="/client/booking/$workerId" params={{ workerId: worker.id }}>
-                Book now
-              </Link>
-            </Button>
+            worker.suspended ? (
+              <Button disabled className="flex-1 sm:flex-none bg-muted text-muted-foreground border-transparent cursor-not-allowed">
+                Unavailable
+              </Button>
+            ) : worker.acceptingBookings !== false ? (
+              <Button asChild className="flex-1 sm:flex-none">
+                <Link to="/client/booking/$workerId" params={{ workerId: worker.id }}>
+                  Book now
+                </Link>
+              </Button>
+            ) : (
+              <Button disabled className="flex-1 sm:flex-none bg-muted text-muted-foreground border-transparent cursor-not-allowed">
+                Offline
+              </Button>
+            )
           ) : null}
         </div>
       </CardContent>

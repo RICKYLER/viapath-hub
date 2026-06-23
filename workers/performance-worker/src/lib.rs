@@ -31,8 +31,6 @@ struct MatchResult {
 }
 
 const BASE32: &[u8] = b"0123456789bcdefghjkmnpqrstuvwxyz";
-
-// Geohash encoding function
 fn encode_geohash(lat: f64, lng: f64, precision: usize) -> String {
     let mut geohash = String::with_capacity(precision);
     let mut lat_interval = (-90.0, 90.0);
@@ -71,14 +69,10 @@ fn encode_geohash(lat: f64, lng: f64, precision: usize) -> String {
     }
     geohash
 }
-
-// Geohash decoding function (returns (lat, lng) representing the center of the bounding box)
 fn decode_geohash(geohash: &str) -> Option<(f64, f64)> {
     let mut lat_interval = (-90.0, 90.0);
     let mut lng_interval = (-180.0, 180.0);
     let mut is_even = true;
-
-    // Create lookup map
     let mut char_map = HashMap::new();
     for (i, &c) in BASE32.iter().enumerate() {
         char_map.insert(c as char, i);
